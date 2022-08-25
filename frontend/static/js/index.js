@@ -17,6 +17,7 @@ const router = async () => { //We use async/await to make sure that the code is 
         { path: "/", view: Dashboard },
         { path: "/news", view: Posts }, //We can add as many routes as we want.,
         { path: "/notes", view: Notes },
+        { path: "/kageliste", view: Kageliste},
         { path: "/absence-check", view: AbsenceCheck },
         { path: "/settings", view: Settings },
         { path: "/messages", view: Messages },
