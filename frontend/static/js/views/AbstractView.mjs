@@ -1,4 +1,4 @@
-//We create a default class for exporten to other directories.
+//We create a default class for exporting to other directories.
 export default class {
     constructor() {
 
