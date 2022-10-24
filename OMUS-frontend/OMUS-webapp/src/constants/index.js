@@ -1,4 +1,19 @@
-import { people01, people02, people03, facebook, instagram, linkedin, twitter, airbnb, binance, coinbase, dropbox, send, shield, star  } from "../assets";
+import {
+  people01,
+  people02,
+  people03,
+  facebook,
+  instagram,
+  linkedin,
+  twitter,
+  airbnb,
+  binance,
+  coinbase,
+  dropbox,
+  send,
+  shield,
+  star,
+} from "../assets";
 
 export const navLinks = [
   {
@@ -16,6 +31,10 @@ export const navLinks = [
   {
     id: "chatrum",
     title: "Chat-rum",
+  },
+  {
+    id: "settings",
+    title: "indstillinger",
   },
 ];
 
@@ -94,23 +113,23 @@ export const footerLinks = [
     links: [
       {
         name: "Content",
-        link: "https://www.hoobank.com/content/",
+        link: "https://www.OMUS.com/content/",
       },
       {
         name: "How it Works",
-        link: "https://www.hoobank.com/how-it-works/",
+        link: "https://www.OMUS.com/how-it-works/",
       },
       {
         name: "Create",
-        link: "https://www.hoobank.com/create/",
+        link: "https://www.OMUS.com/create/",
       },
       {
         name: "Explore",
-        link: "https://www.hoobank.com/explore/",
+        link: "https://www.OMUS.com/explore/",
       },
       {
         name: "Terms & Services",
-        link: "https://www.hoobank.com/terms-and-services/",
+        link: "https://www.OMUS.com/terms-and-services/",
       },
     ],
   },
@@ -119,23 +138,23 @@ export const footerLinks = [
     links: [
       {
         name: "Help Center",
-        link: "https://www.hoobank.com/help-center/",
+        link: "https://www.OMUS.com/help-center/",
       },
       {
         name: "Partners",
-        link: "https://www.hoobank.com/partners/",
+        link: "https://www.OMUS.com/partners/",
       },
       {
         name: "Suggestions",
-        link: "https://www.hoobank.com/suggestions/",
+        link: "https://www.OMUS.com/suggestions/",
       },
       {
         name: "Blog",
-        link: "https://www.hoobank.com/blog/",
+        link: "https://www.OMUS.com/blog/",
       },
       {
         name: "Newsletters",
-        link: "https://www.hoobank.com/newsletters/",
+        link: "https://www.OMUS.com/newsletters/",
       },
     ],
   },
@@ -144,11 +163,11 @@ export const footerLinks = [
     links: [
       {
         name: "Our Partner",
-        link: "https://www.hoobank.com/our-partner/",
+        link: "https://www.OMUS.com/partners",
       },
       {
         name: "Become a Partner",
-        link: "https://www.hoobank.com/become-a-partner/",
+        link: "https://www.OMUS.com/become-a-partner/",
       },
     ],
   },
@@ -169,11 +188,6 @@ export const socialMedia = [
     id: "social-media-3",
     icon: twitter,
     link: "https://www.twitter.com/",
-  },
-  {
-    id: "social-media-4",
-    icon: linkedin,
-    link: "https://www.linkedin.com/",
   },
 ];
 
