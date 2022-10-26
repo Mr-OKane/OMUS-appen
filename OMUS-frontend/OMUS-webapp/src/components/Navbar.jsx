@@ -8,7 +8,11 @@ const Navbar = () => {
 
   return (
     <nav className="w-full flex py-6 justify-between items-center navbar">
-      <img src={logo} alt="OMUS" clasName="flex justify-center items-center" />
+      <img
+        src={logo}
+        alt="OMUS"
+        className="mx-auto flex justify-center items-center place-content-center"
+      />
       <ul className="list-none md:flex hidden justify-end items center flex-1">
         {navLinks.map((nav, index) => (
           <li
@@ -28,6 +32,7 @@ const Navbar = () => {
           className="w-[28px] h-[28px] object-contain"
           onClick={() => setToggle((prev) => !prev)}
         />
+        <img src={logo} alt="OMUS" className="hidden md:" />
         <div
           className={`${
             !toggle ? "hidden" : "flex"
