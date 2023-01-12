@@ -6,13 +6,15 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "darkaonline/l5-swagger": "^8.4",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "shuchkin/simplecsv": "^0.1.1",
         "shuchkin/simplexls": "^0.10.3",
-        "shuchkin/simplexlsx": "^1.0"
+        "shuchkin/simplexlsx": "^1.0",
+        "zircote/swagger-php": "^4.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

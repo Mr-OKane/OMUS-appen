@@ -84,7 +84,7 @@ class ProductController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        return ProductResource::collection(Product::firstWhere('id','=',$product));
+        return ProductResource::collection(Product::findOrFail($product));
     }
 
     /**
@@ -100,7 +100,7 @@ class ProductController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        $object = Product::withTrashed()->where('id','=',$product)->first();
+        $object = Product::withTrashed()->where('id','=',$product->id)->first();
 
         if (!empty($request)){
             $this->validate($request,[
@@ -110,6 +110,7 @@ class ProductController extends Controller
                 'price' => 'required|double|max:11',
             ]);
         }
+
         if ($object->name != $request->name){
             $object->name = $request->name;
         }

@@ -31,6 +31,19 @@ class TeamPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
+    public function deleted(User $user)
+    {
+        return $user->role->permissions->contains(Permission::firstWhere('name','=','team.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+    }
+
+    /**
+     * Determine whether the user can view any models.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
     public function teamUserViewAny(User $user)
     {
         return $user->role->permissions->contains(Permission::firstWhere('name','=','team.user.viewAny'))
@@ -73,7 +86,8 @@ class TeamPolicy
      */
     public function teamUserCreate(User $user)
     {
-        return $user->role->permissions->contains(Permission::firstWhere('name','=','team.user.create'))
+        return ($user->role->permissions->contains(Permission::firstWhere('name','=','team.user.create'))
+        && $user->role->permissions->contains(Permission::firstWhere('name', '=', 'team.user.delete')))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
     }
@@ -102,20 +116,6 @@ class TeamPolicy
     public function delete(User $user, Team $team)
     {
         return $user->role->permissions->contains(Permission::firstWhere('name','=','team.delete'))
-            ? Response::allow()
-            : Response::deny('you are not the chosen one');
-    }
-
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Team  $team
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function userCreate(User $user, Team $team)
-    {
-        return $user->role->permissions->contains(Permission::firstWhere('name','=','team.user.delete'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
     }

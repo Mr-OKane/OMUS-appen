@@ -30,6 +30,22 @@ class TeamController extends Controller
      * Display a listing of the resource.
      *
      * @param  \App\Models\Team  $team
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function teamDeleted(Team $team)
+    {
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'team.deleted.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+
+        $deletedTeams = Team::onlyTrashed();
+        return response()->json($deletedTeams,200);
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  \App\Models\Team  $team
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function teamUserIndex(Team $team)
@@ -107,7 +123,9 @@ class TeamController extends Controller
             $this->validate($request,[
                'name' => 'required|string|max:255',
             ]);
-            $team->name = $request['name'];
+            if ($team->name != $request->name){
+                $team->name = $request->name;
+            }
         }
         $team->save();
         return response()->json(["message" => 'Updated team successfully', "object" => $team],$statusCode);
@@ -121,13 +139,14 @@ class TeamController extends Controller
      */
     public function teamUsersUpdate(UpdateTeamRequest $request, Team $team)
     {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'team.user.create')) && Auth::user()->role->permissions->contains(Permission::firstWhere('name','=','team.user.delete'))
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'team.user.update'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
-        $users = $request['users'];
+
+        $users = $request->users;
         $oldUsers = $team->users()->get()->toArray();
 
-        if (!empty($request['users'])){
+        if (!empty($request->users)){
             foreach ($users as $user){
                 $key = array_search($user->id, array_column($oldUsers, 'id'));
                 if($key){
@@ -146,6 +165,7 @@ class TeamController extends Controller
             // loop oldusers og slet dem der er tilbage
         }
         $team->save();
+
         return response()->json(['message' => 'Added and removed users to the team','object'=> $team->users()],200);
     }
 
@@ -177,6 +197,7 @@ class TeamController extends Controller
         Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'team.forceDelete'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
+
         $object = Team::withTrashed()->where('id','=',$team)->first();
         $object->forceDelete();
         return response()->json(['message'=> 'deleted completely','object' => $team],200);

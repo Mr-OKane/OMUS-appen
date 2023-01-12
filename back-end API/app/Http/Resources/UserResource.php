@@ -19,9 +19,9 @@ class UserResource extends JsonResource
             'lastname' => $this->lastname,
             'email' => $this->email,
             'password' => $this->password,
-            'instruments' => InstrumentResource::collection($this->instruments),
-            'roles' => RoleResource::collection($this->roles),
-            'orders' => OrderResource::collection($this->orders),
+            //'instruments' => InstrumentResource::collection($this->instruments),
+            //'roles' => RoleResource::collection($this->roles),
+            //'orders' => OrderResource::collection($this->orders),
             'create_at' => $this->created_at,
             'update_at' => $this->update_at,
         ];

@@ -26,6 +26,19 @@ class OrderPolicy
     }
 
     /**
+     * Determine whether the user can view any models.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function deleted(User $user)
+    {
+        return $user->role->permissions->contains(Permission::firstWhere('name','=','order.deleted.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+    }
+
+    /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user

@@ -2,20 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PermissionResource;
 use App\Models\Permission;
 use App\Http\Requests\StorePermissionRequest;
 use App\Http\Requests\UpdatePermissionRequest;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Auth;
 
 class PermissionController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        //
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'permission.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+
+        return PermissionResource::collection(Permission::all());
     }
 
     /**

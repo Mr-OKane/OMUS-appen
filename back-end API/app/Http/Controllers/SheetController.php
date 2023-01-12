@@ -7,8 +7,11 @@ use App\Models\Permission;
 use App\Models\Sheet;
 use App\Http\Requests\StoreSheetRequest;
 use App\Http\Requests\UpdateSheetRequest;
+use Faker\Core\File;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use function Symfony\Component\String\s;
 
 class SheetController extends Controller
 {
@@ -22,24 +25,30 @@ class SheetController extends Controller
         Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'sheet.viewAny'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
+
         return SheetResource::collection(Sheet::all());
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function deletedSheets()
     {
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'sheet.deleted.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
 
+        $deletedSheets = Sheet::onlyTrashed();
+        return response()->json($deletedSheets,200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreSheetRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreSheetRequest $request)
     {
@@ -47,6 +56,18 @@ class SheetController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
+        $sheet = new Sheet();
+        $this->validate($request,[
+            'notes' => 'required|file'
+        ]);
+
+        $fileName = Auth::user()->id . '_' . time() . '.'. $request->notes->extension();
+
+        $request->notes->move(public_path('pdf/upload'), $fileName);
+        $sheet->notes = $fileName;
+        $sheet->save();
+
+        return response()->json(['message' => 'uploaded the pdf to ','object' => '/pdf/upload/'.$fileName],201);
 
     }
 
@@ -54,7 +75,7 @@ class SheetController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Sheet  $sheet
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function show(Sheet $sheet)
     {
@@ -62,30 +83,7 @@ class SheetController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        return SheetResource::collection(Sheet::findOrFail($sheet));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Sheet  $sheet
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Sheet $sheet)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateSheetRequest  $request
-     * @param  \App\Models\Sheet  $sheet
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateSheetRequest $request, Sheet $sheet)
-    {
-        //
+        return response()->file(public_path('pdf/upload')."/".$sheet->notes);
     }
 
     /**

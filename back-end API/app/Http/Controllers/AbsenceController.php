@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AbsenceResource;
 use App\Models\Absence;
 use App\Http\Requests\StoreAbsenceRequest;
 use App\Http\Requests\UpdateAbsenceRequest;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\User;
 use http\Env\Request;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +24,7 @@ class AbsenceController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request)
     {
@@ -30,90 +32,49 @@ class AbsenceController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        $absencePerPagnation = 10;
-        $absences = Absence::paginate($absencePerPagnation);
-        return view('absence.index')->with('absences', $absences);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'absence.create'))
-            ? Response::allow()
-            : Response::deny('you are not the chosen one');
-
-        return view('absence.create');
+        return AbsenceResource::collection(Absence::all());
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreAbsenceRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreAbsenceRequest $request)
     {
         Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'absence.create'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
+        $absence = new Absence();
+        $this->validate($request,[
+            'absence' => 'required|boolean',
+            'date' => 'required|date',
+            'user' => 'required|integer|digits_between:1,20'
+        ]);
+        $absence->absence = $request->absence;
+        $absence->date = $request->date;
+        $absence->user()->associate(User::firstWhere('id','=',$request['user'])->id);
+        $absence->save();
 
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Absence  $absence
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Absence $absence)
-    {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'absence.show'))
-            ? Response::allow()
-            : Response::deny('you are not the chosen one');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Absence  $absence
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Absence $absence)
-    {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'absence.update'))
-            ? Response::allow()
-            : Response::deny('you are not the chosen one');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateAbsenceRequest  $request
-     * @param  \App\Models\Absence  $absence
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateAbsenceRequest $request, Absence $absence)
-    {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'absence.update'))
-            ? Response::allow()
-            : Response::deny('you are not the chosen one');
+        return response()->json(['message' => 'created the absence', 'object' => $absence],201);
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Absence  $absence
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Absence $absence)
     {
         Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'absence.delete'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
+
+        $object = Absence::withTrashed()->where('id', '=', $absence)->first();
+        $object->delete();
+        return response()->json(['message' => 'deleted the absence', 'object' => $object]);
     }
 
 }

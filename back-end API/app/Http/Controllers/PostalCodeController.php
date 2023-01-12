@@ -2,20 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PostalCodeResource;
+use App\Models\Permission;
 use App\Models\PostalCode;
 use App\Http\Requests\StorepostalCodeRequest;
 use App\Http\Requests\UpdatepostalCodeRequest;
+use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Auth;
+use function GuzzleHttp\Promise\all;
 
 class PostalCodeController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        //
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'Postalcode.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+
+        return PostalCodeResource::collection(PostalCode::all());
     }
 
     /**
@@ -43,23 +52,18 @@ class PostalCodeController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\PostalCode  $postalCode
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function show(PostalCode $postalCode)
     {
-        //
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'Postalcode.view'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+
+        return PostalCodeResource::collection(PostalCode::findOrFail($postalCode));
+
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\PostalCode  $postalCode
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(PostalCode $postalCode)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.

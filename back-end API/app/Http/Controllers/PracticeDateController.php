@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PracticeDateResource;
+use App\Models\ChatRoom;
 use App\Models\Permission;
 use App\Models\PracticeDate;
 use App\Http\Requests\StorePractisceDateRequest;
 use App\Http\Requests\UpdatePractisceDateRequest;
+use App\Models\Team;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Auth;
 
@@ -64,7 +66,7 @@ class PracticeDateController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        return PracticeDateResource::collection(PracticeDate::firstWhere('id','=',$practisceDate->id));
+        return PracticeDateResource::collection(PracticeDate::findOrFail($practisceDate));
     }
 
 
@@ -81,15 +83,20 @@ class PracticeDateController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        $object = PracticeDate::withTrashed()->where('id','=',$request->id);
+        $object = PracticeDate::withTrashed()->where('id','=',$practisceDate)->first();
         if (!empty($request)) {
             $this->validate($request, [
                 'practice' => 'required|date',
-                'room' => 'required|integer|digits_between:1,20',
+                'team' => 'required|integer|digits_between:1,20',
             ]);
         }
-        
 
+        if ($object->practice != $request->practice){
+            $object->practice = $request->practice;
+        }
+        if ($object->roomID != $object->roomID){
+            $object->roomID = $request->roomID;
+        }
 
     }
 
@@ -97,7 +104,7 @@ class PracticeDateController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\PracticeDate  $practisceDate
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(PracticeDate $practisceDate)
     {
@@ -105,6 +112,8 @@ class PracticeDateController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
+        $practisceDate->delete();
+        return response()->json(['message' => 'deleted the practicedate','object' => $practisceDate],200);
     }
 
 }

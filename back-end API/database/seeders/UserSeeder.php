@@ -6,6 +6,7 @@ use App\Models\Instrument;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Shuchkin\SimpleXLSX;
 
 class UserSeeder extends Seeder
@@ -29,7 +30,7 @@ class UserSeeder extends Seeder
             'firstname' => "John",
             'lastname' => "Dllrman",
             'email' => 'johnD@gmail.com',
-            'password' => 'Aa123456&',
+            'password' => Hash::make('Aa123456&'),
             'instrumentID' => Instrument::all()->random(1)[0]["id"],
             'roleID' => 1
         ]);
@@ -38,7 +39,7 @@ class UserSeeder extends Seeder
             'firstname' => "lucifer",
             'lastname' => "morningstar",
             'email' => 'lucistar@gmail.com',
-            'password' => 'Aa123456&',
+            'password' => Hash::make('Aa123456&'),
             'instrumentID' => Instrument::all()->random(1)[0]["id"],
             'roleID' => 1
         ]);
@@ -47,7 +48,7 @@ class UserSeeder extends Seeder
         'firstname' => "Izuku",
         'lastname' => "Midoriya",
         'email' => 'midoriya@gmail.com',
-        'password' => 'Aa123456&',
+        'password' => Hash::make('Aa123456&'),
         'instrumentID' => Instrument::all()->random(1)[0]["id"],
         'roleID' => 1
         ]);
@@ -56,7 +57,7 @@ class UserSeeder extends Seeder
             'firstname' => "Katsuki",
             'lastname' => "Bakugo",
             'email' => 'bakugo@gmail.com',
-            'password' => 'Aa123456&',
+            'password' => Hash::make('Aa123456&'),
             'instrumentID' => Instrument::all()->random(1)[0]["id"],
             'roleID' => 1
         ]);
@@ -65,7 +66,7 @@ class UserSeeder extends Seeder
             'firstname' => "Shoto",
             'lastname' => "Todoroki",
             'email' => 'todoroki@gmail.com',
-            'password' => 'Aa123456&',
+            'password' => Hash::make('Aa123456&'),
             'instrumentID' => Instrument::all()->random(1)[0]["id"],
             'roleID' => 1
         ]);
@@ -74,7 +75,7 @@ class UserSeeder extends Seeder
             'firstname' => "Tenya",
             'lastname' => "Iida",
             'email' => 'iida@gmail.com',
-            'password' => 'Aa123456&',
+            'password' => Hash::make('Aa123456&'),
             'instrumentID' => Instrument::all()->random(1)[0]["id"],
             'roleID' => 1
         ]);

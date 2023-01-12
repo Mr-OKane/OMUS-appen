@@ -13,6 +13,7 @@ use Illuminate\Auth\Access\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -20,7 +21,7 @@ class UserController extends Controller
     public function __construct()
     {
         //adds policy's to Controller
-        $this->authorizeResource(User::class, 'user' );
+        //$this->authorizeResource(User::class, 'user' );
     }
 
     /**
@@ -28,31 +29,29 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index(\http\Env\Request $request)
+    public function index()
     {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.viewAny'))
+        $user = Auth::user();
+        $user->role->permissions->contains(Permission::firstWhere('name', '=', 'user.viewAny'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        $userPerPagnation = 10;
-        $users = User::paginate($userPerPagnation);
         return UserResource::collection(User::all());
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function deletedUsers(\http\Env\Request $request)
+    public function deletedUsers()
     {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.viewAny'))
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.deleted.viewAny'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        $userPerPagnation = 10;
-        $users = User::paginate($userPerPagnation);
-        return UserResource::collection(User::all());
+        $deletedUsers = User::onlyTrashed();
+        return response()->json($deletedUsers,200);
     }
 
     /**
@@ -80,12 +79,12 @@ class UserController extends Controller
         $user->firstname = $request['firstname'];
         $user->lastname = $request['lastname'];
         $user->email = $request['email'];
-        $user->password = $request['password'];
+        $user->password = Hash::make($request['password']);
         $user->role()->associate(Role::firstwhere('name','=',$request['role'])->id);
         $user->instruments()->associate(Instrument::firstwhere('name','=',$request['instrument']));
         $user->save();
 
-        return response()->json(['message'=>'created user successfully', 'object' =>$user], 201);
+        return response()->json(['message' => 'created user successfully', 'object' => $user, 'token' => $user->createToken("API Token")->plainTextToken], 201);
     }
 
     /**
@@ -112,6 +111,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
+
         Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.update'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
@@ -122,13 +122,20 @@ class UserController extends Controller
                 'lastname' => 'Required|string|max:255',
                 'email' => 'Required|string|max:255',]);
 
-            $user->firstname = $request['firstname'];
-            $user->lastname = $request['lastname'];
-            $user->email = $request['email'];
+            if ($user->firstname != $request->firstname){
+                $user->firstname = $request->firstname;
+            }
+            if ($user->lastname != $request->lastname){
+                $user->lastname = $request->lastname;
+            }
+            if ($user->email != $request->email){
+                $user->email = $request->email;
+            }
         }
 
         $user->save();
-        return response()->json('updated user successfully'.$user,200);
+
+        return response()->json(['message' => 'updated user successfully', 'object' => $user],200);
     }
 
     /**
@@ -138,9 +145,9 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updatePassword(UpdateUserRequest $request, User $user)
+    public function userPasswordUpdate(UpdateUserRequest $request, User $user)
     {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.update'))
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.password.update'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
@@ -154,10 +161,14 @@ class UserController extends Controller
                 'password' => 'Required|string|max:255',
                 'repeatPassword' => 'Required|string|max:255'
             ]);
-            $user->password = $request['password'];
+
+            if ($user->password != $request->password){
+                $user->password = $request->password;
+            }
         }
         $user->save();
-        return response()->json(['message'=>'updated users password successfully','object'=>$user], 200);
+
+        return response()->json(['message' => 'updated users password successfully', 'object' => $user], 200);
     }
 
     /**
@@ -167,7 +178,7 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateRole(UpdateUserRequest $request, User $user)
+    public function userRoleUpdate(UpdateUserRequest $request, User $user)
     {
         Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.role.update'))
             ? Response::allow()
@@ -182,9 +193,12 @@ class UserController extends Controller
         $this->validate($request, [
             'role' => 'Required|Integer|digits_between:1,20'
         ]);
-        $user->role = $request['role'];
+        if ($user->roleID != $request->roleID){
+            $user->roleID = $request->roleID;
+        }
         $user->save();
-        return response()->json(['message'=>'role updated successfully ','object'=>$user], 200);
+
+        return response()->json(['message' => 'role updated successfully ', 'object' => $user], 200);
     }
 
     /**
@@ -194,10 +208,10 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateInstrument(UpdateUserRequest $request, User $user)
+    public function userInstrumentsUpdate(UpdateUserRequest $request, User $user)
     {
         $statusCode = 200;
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.update'))
+        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'user.instrument.update'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
@@ -210,12 +224,13 @@ class UserController extends Controller
         ]);
         foreach ($request['instruments'] as $instrument){
             if (!(Instrument::findfirst('id','=',$instrument))){
-                return response()->json(['message'=>'instrument does not exist ','object'=>$instrument],$statusCode = 404);
+                return response()->json(['message' => 'instrument does not exist ', 'object' => $instrument], $statusCode = 404);
             }
         }
         $user->instruments() == $request['instruments'];
         $user->save();
-        return response()->json(['message'=>'updated instrument(s) successfully','object'=>$user],$statusCode);
+
+        return response()->json(['message' => 'updated instrument(s) successfully', 'object' => $user],$statusCode);
     }
 
     /**
@@ -232,7 +247,7 @@ class UserController extends Controller
 
         $object = User::withTrashed()->where('id', '=', $user)->first();
         $object->delete();
-        return response()->json(['message'=>'deleted user','object' => $user],200);
+        return response()->json(['message' => 'deleted user', 'object' => $user],200);
     }
 
     /**
@@ -260,7 +275,7 @@ class UserController extends Controller
             }
         }
         $object->forceDelete();
-        return response()->json(["message"=>"completely deleted ","object" =>$user],200);
+        return response()->json(['message' => 'completely deleted ', 'object' => $user],200);
     }
 
     /**
@@ -277,6 +292,6 @@ class UserController extends Controller
 
         $objekt = User::withTrashed()->where('id','=',$user)->first();
         $objekt->restore();
-        return response()->json(["message"=>'restored the user',"object" => $user],200);
+        return response()->json(['message' => 'restored the user', 'object' => $user],200);
     }
 }

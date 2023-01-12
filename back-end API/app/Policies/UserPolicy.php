@@ -3,20 +3,19 @@
 namespace App\Policies;
 
 use App\Models\Permission;
-use App\Models\Team;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 
-class TeamPolicy
+class UserPolicy
 {
     use HandlesAuthorization;
 
     /**
      * Determine whether the user can view any models.
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
+     * @param  User  $user
+     * @return Response
      */
     public function viewAny(User $user)
     {
@@ -26,11 +25,24 @@ class TeamPolicy
     }
 
     /**
+     * Determine whether the user can view any models.
+     *
+     * @param  User  $user
+     * @return Response
+     */
+    public function deleted(User $user)
+    {
+        return $user->role->permissions->contains(Permission::firstWhere('name','=','user.deleted.viewAny'))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+    }
+
+    /**
      * Determine whether the user can view the model.
      *
-     * @param  \App\Models\User  $user
-     * @param \App\Models\User $model
-     * @return \Illuminate\Auth\Access\Response|bool
+     * @param  User  $user
+     * @param  User $model
+     * @return Response
      */
     public function view(User $user, User $model)
     {
@@ -64,6 +76,50 @@ class TeamPolicy
     {
         return ($user->id === $model->id
             or $user->role->permissions->contains(Permission::firstWhere('name', '=', 'user.update')))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param \App\Models\User $model
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function passwordUpdate(User $user, User $model)
+    {
+        return ($user->id === $model->id
+            or $user->role->permissions->contains(Permission::firstWhere('name', '=', 'user.password.update')))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param \App\Models\User $model
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function userRoleUpdate(User $user, User $model)
+    {
+        return ($user->role->permissions->contains(Permission::firstWhere('name', '=', 'user.role.update')))
+            ? Response::allow()
+            : Response::deny('you are not the chosen one');
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     *
+     * @param  \App\Models\User  $user
+     * @param \App\Models\User $model
+     * @return \Illuminate\Auth\Access\Response|bool
+     */
+    public function instrumentUpdate(User $user, User $model)
+    {
+        return ($user->id === $model->id
+            or $user->role->permissions->contains(Permission::firstWhere('name', '=', 'user.instrument.update')))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
     }
