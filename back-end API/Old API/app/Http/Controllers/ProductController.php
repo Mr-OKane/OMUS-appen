@@ -19,7 +19,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        Auth::user()->role->permissions->contains(Permission::firstWhere('name', '=', 'product.viewAny'))
+        Auth('sacturm')->user->role->permissions->contains(Permission::firstWhere('name', '=', 'product.viewAny'))
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 

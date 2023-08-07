@@ -37,7 +37,7 @@ class LoginController extends Controller
 
         //if the login fails
         Auth::logout();
-        return response()->json(['error' => "The provided credentials do not match our records."],400);
+        return response()->json(['error' => "The provided credentials do not match our records."],401);
     }
 
     /**

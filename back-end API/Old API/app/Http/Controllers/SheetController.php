@@ -11,7 +11,6 @@ use Faker\Core\File;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use function Symfony\Component\String\s;
 
 class SheetController extends Controller
 {
@@ -83,7 +82,7 @@ class SheetController extends Controller
             ? Response::allow()
             : Response::deny('you are not the chosen one');
 
-        return response()->file(public_path('pdf/upload')."/".$sheet->notes);
+        return response()->file(public_path('pdf/upload') . "SheetController.php/" .$sheet->notes);
     }
 
     /**

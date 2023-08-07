@@ -47,7 +47,7 @@ class IdeaController extends Controller
         ]);
         $idea->idea = $request->idea;
         $idea->save();
-        return response()->json(['message' => 'Created the idea', 'object' => $idea],201);
+        return response()->json(['message' => 'Created the idea', 'object   ' => $idea],201);
     }
 
     /**
