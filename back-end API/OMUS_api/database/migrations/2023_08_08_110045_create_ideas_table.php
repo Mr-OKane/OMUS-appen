@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('ideas', function (Blueprint $table) {
             $table->id();
+            $table->string('idea');
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
