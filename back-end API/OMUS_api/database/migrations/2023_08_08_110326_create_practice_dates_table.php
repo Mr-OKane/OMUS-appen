@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
     /**
      * Run the migrations.
      */
@@ -13,7 +14,9 @@ return new class extends Migration
     {
         Schema::create('practice_dates', function (Blueprint $table) {
             $table->id();
+            $table->dateTime('practice_date');
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
