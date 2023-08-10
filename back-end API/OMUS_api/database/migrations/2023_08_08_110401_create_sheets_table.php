@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('sheets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->nullOnDelete();
+            $table->longText('pdf');
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
