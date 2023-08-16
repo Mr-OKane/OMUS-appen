@@ -17,7 +17,10 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->word(),
+            'description' => $this->faker->text(500),
+            'image' => $this->faker->image(),
+            'price' => $this->faker->randomFloat('2',0,100000)
         ];
     }
 }
