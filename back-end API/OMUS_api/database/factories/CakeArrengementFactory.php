@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\PracticeDate;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +19,8 @@ class CakeArrengementFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'practice_date_id' => PracticeDate::all()->random('1')[0]['id'],
+            'user_id' => User::all()->random(1)[0]['id'],
         ];
     }
 }
