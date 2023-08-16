@@ -17,7 +17,8 @@ class PracticeDateFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'practice_date' => $this->faker->dateTime(),
+            ''
         ];
     }
 }
