@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('role_id')->constrained('roles')->nullOnDelete();
             $table->foreignId('status_id')->constrained('statuses')->nullOnDelete();
+            $table->foreignId('address_id')->constrained('addresses')->nullOnDelete();
             $table->string('firstname');
             $table->string(('lastname'));
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('phone_nr')->unique();
+            $table->string('phone_nr')->unique()->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
