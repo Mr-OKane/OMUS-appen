@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,8 @@ class SheetFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::all()->random(1)[0]['id'],
+            'pdf' => $this->faker->sentence(),
         ];
     }
 }
