@@ -17,7 +17,7 @@ class IdeaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'idea' => $this->faker->word(),
         ];
     }
 }
