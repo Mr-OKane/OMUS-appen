@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Address;
+use App\Models\Status;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +20,10 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'address_id' => Address::all()->random(1)[0]['id'],
+            'status_id' => Status::all()->random(1)[0]['id'],
+            'user_id' => User::all()->random(1)[0]['id'],
+            'order_date' => $this->faker->dateTime(),
         ];
     }
 }
