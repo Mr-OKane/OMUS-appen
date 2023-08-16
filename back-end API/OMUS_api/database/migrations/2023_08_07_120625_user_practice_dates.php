@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('user_practice_dates', function (Blueprint $table) {
             $table->foreignId('practice_date_id')->constrained('practice_dates')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->boolean('absence');
         });
     }
 
