@@ -4,6 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -18,7 +21,9 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'phone_nr',
         'email',
         'password',
     ];
@@ -39,7 +44,36 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function instrument(): BelongsToMany
+    {
+       return $this->belongsToMany(Instrument::class,'user_instruments','user_id','instrument_id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class,'user_id','id');
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class,'role_id');
+    }
+
+    public function sheets(): HasMany
+    {
+        return $this->hasMany(Sheet::class,'user_id','id');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class,'status_id');
+    }
+
+    public function teams(): BelongsToMany
+    {
+        return $this->belongsToMany(Team::class, 'team_users','user_id','team_id');
+    }
 }
