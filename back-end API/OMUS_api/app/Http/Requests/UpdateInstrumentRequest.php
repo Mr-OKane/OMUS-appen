@@ -11,7 +11,7 @@ class UpdateInstrumentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class UpdateInstrumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|max:255'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => 'Instrumentet skal have et navn',
+            'name.max' => 'Instrumentet må kun have et max af 255 tegn'
         ];
     }
 }
