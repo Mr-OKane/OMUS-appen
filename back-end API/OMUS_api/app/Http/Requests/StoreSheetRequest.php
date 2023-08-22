@@ -11,7 +11,7 @@ class StoreSheetRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,19 @@ class StoreSheetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'User' => "required|integer|digits_between:1,20",
+            'pdf' => "required|file"
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'user.required' => "Der skal være en bruger koblet sammen med pdf'en.",
+            'user.digits_between' => "brugerens id skal være mellem 1 og 20 cifre.",
+            'pdf.required' => "Der skal være en fil",
+            'pdf.file' => "Filen er ikke uploaded ordenligt."
+        ];
+    }
+
 }
