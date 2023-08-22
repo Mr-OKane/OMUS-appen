@@ -11,7 +11,7 @@ class UpdateStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class UpdateStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => "required|string|max:255"
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => "statusen skal have et navn.",
+            'name.max' => "statusens navn kan ikke være længere end 255 tegn.",
         ];
     }
 }
