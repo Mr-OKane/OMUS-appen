@@ -11,7 +11,7 @@ class StoreIdeaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class StoreIdeaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'idea' => 'required|string|max:255'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'idea.required' => 'Ide fæltet skal være udfyldt.',
+            'idea.max' => 'ideens kan ikke være længere end 255 tegn.'
         ];
     }
 }
