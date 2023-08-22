@@ -11,7 +11,7 @@ class StoreChatRoomRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,14 @@ class StoreChatRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => "required|string|max:255"
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'name.required' => "chat rummet skal have navn.",
+            'name.max' => "chat rummet kan ikke være længere end 255 tegn",
         ];
     }
 }
