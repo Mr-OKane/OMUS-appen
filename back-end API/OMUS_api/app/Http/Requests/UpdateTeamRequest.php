@@ -11,7 +11,7 @@ class UpdateTeamRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class UpdateTeamRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => "required|string|max:255"
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => "orkesteret skal have et navn.",
+            'name.max' => "orkesterets navn kan ikke være mere end 255 tegn."
         ];
     }
 }
