@@ -11,7 +11,7 @@ class StoreMessageRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,15 @@ class StoreMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'Message' => "required|string|max:1000"
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'message.required' => "Der skal være skrevet noget.",
+            'message.max' => "beskeden har et max på 1000 tegn."
         ];
     }
 }
