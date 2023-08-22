@@ -11,7 +11,7 @@ class StoreChatRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,18 @@ class StoreChatRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => "required|string|max:255",
+            'chatRoom' => 'required|integer|digits_between:1,20'
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'name.required' => "chaten skal have et navn.",
+            'name.max' => "chatens navn kan ikke ",
+            'chatRoom.required' => "chaten skal være i et chat rum",
+            'chatRoom.digits_between' => "chatens chat rum id skal være mellem 1 og 20 cifre",
         ];
     }
 }
