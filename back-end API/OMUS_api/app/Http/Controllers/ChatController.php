@@ -5,15 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\Chat;
 use App\Http\Requests\StoreChatRequest;
 use App\Http\Requests\UpdateChatRequest;
+use Illuminate\Http\Request;
 
 class ChatController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+            $pagninationPerPage = $request['p'] ?? 15;
+            if ($pagninationPerPage >= 1000){
+                return response()->json(['message' => "1000+ is to much pagnation"]);
+            }
+            $chat = Chat::with('chatRoom')->with('messages')->paginate($pagninationPerPage);
+
+            return response()->json(['object' => $chat]);
     }
 
     /**
@@ -21,30 +28,58 @@ class ChatController extends Controller
      */
     public function store(StoreChatRequest $request)
     {
-        //
+        $request->validated();
+
+        $chat = new Chat();
+        $chat['name'] = $request['name'];
+        $chat->chatRoom()->associate($request['chatroom']);
+        $chat->save();
+
+        $object = Chat::withTrashed()->firstWhere('id','=', $chat['id']);
+        $object->chatRoom;
+
+        return response()->json(['message' => "created the chat successfully",'object' => $object],201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Chat $chat)
+    public function show(string $chat)
     {
-        //
+        $object = Chat::withTrashed()->firstWhere('id','=', $chat);
+        $object->chatRoom;
+        $object->messages;
+
+        return response()->json(['object' => $object]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateChatRequest $request, Chat $chat)
+    public function update(UpdateChatRequest $request, string $chat)
     {
-        //
+        $request->validated();
+
+        $object = Chat::withTrashed()->firstWhere('id','=', $chat);
+        if ($object['name'] != $request['name'])
+        {
+            $object['name'] = $request['name'];
+        }
+        $object->chatRoom()->associate($request['chatRoom']);
+
+        $object->save();
+        return response()->json(['message' => "successfully updated the chat", 'object' => $object]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Chat $chat)
+    public function destroy(string $chat)
     {
-        //
+        $object = Chat::withTrashed()->firstWhere('id','=', $chat);
+        $object->delete();
+
+        return response()->json(['message' => "deleted the chat successfully"]);
+
     }
 }
