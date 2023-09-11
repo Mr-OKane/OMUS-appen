@@ -16,6 +16,7 @@ class Product extends Model
         'description',
         'image',
         'price',
+        'amount',
     ];
 
     public function orders(): BelongsToMany
