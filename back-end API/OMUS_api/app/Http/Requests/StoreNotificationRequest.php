@@ -22,7 +22,7 @@ class StoreNotificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'notification' => "required|string|max:255"
+            'message' => "required|string|max:255"
         ];
     }
 
