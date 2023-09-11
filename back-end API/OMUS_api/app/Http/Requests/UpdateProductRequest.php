@@ -25,7 +25,8 @@ class UpdateProductRequest extends FormRequest
             'name' => "required|string|max:255",
             'description' => "string|max:4000",
             'image' => "image",
-            'price' => "required|decimal:2,2|max:10000000"
+            'price' => "required|decimal:2,2|max:10000000",
+            'amount' => "required|int|max:100000"
         ];
     }
 
