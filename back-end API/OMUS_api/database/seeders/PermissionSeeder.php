@@ -14,9 +14,6 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $items = [
-            ['name' => 'absence.viewAny'],
-            ['name' => 'absence.create'],
-            ['name' => 'absence.delete'],
             ['name' => 'address.viewAny'],
             ['name' => 'address.create'],
             ['name' => 'address.view'],
@@ -69,11 +66,6 @@ class PermissionSeeder extends Seeder
             ['name' => 'order.delete'],
             ['name' => 'order.delete.force'],
             ['name' => 'order.restore'],
-            ['name' => 'orderproduct.viewAny'],
-            ['name' => 'orderproduct.create'],
-            ['name' => 'orderproduct.view'],
-            ['name' => 'orderproduct.update'],
-            ['name' => 'orderproduct.delete'],
             ['name' => 'permission.viewAny'],
             ['name' => 'practicedate.viewAny'],
             ['name' => 'practicedate.create'],
@@ -115,7 +107,6 @@ class PermissionSeeder extends Seeder
             ['name' => 'sheet.restore'],
             ['name' => 'team.viewAny'],
             ['name' => 'team.deleted.viewAny'],
-            ['name' => 'team.user.viewAny'],
             ['name' => 'team.create'],
             ['name' => 'team.view'],
             ['name' => 'team.update'],
