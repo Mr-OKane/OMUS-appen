@@ -5,15 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\ZipCode;
 use App\Http\Requests\StoreZipCodeRequest;
 use App\Http\Requests\UpdateZipCodeRequest;
+use Illuminate\Http\Request;
 
 class ZipCodeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ per page is to much"],400);
+        }
+        $zipCodes = ZipCode::with('addresses')->with('city')->paginate($paginationPerPage);
+
+        return response()->json(['object' => $zipCodes]);
     }
 
     /**
@@ -27,9 +35,13 @@ class ZipCodeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ZipCode $zipCode)
+    public function show(string $zipCode)
     {
-        //
+        $object = ZipCode::withTrashed()->firstWhere('id','=', $zipCode);
+        $object->addresses;
+        $object->city;
+
+        return response()->json(['object' => $object]);
     }
 
     /**
