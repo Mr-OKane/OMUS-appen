@@ -22,7 +22,8 @@ class StoreMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'Message' => "required|string|max:1000"
+            'message' => "required|string|max:1000",
+            'chat' => "required|integer|digits_between:1,20"
         ];
     }
 
@@ -30,7 +31,9 @@ class StoreMessageRequest extends FormRequest
     {
         return [
             'message.required' => "Der skal være skrevet noget.",
-            'message.max' => "beskeden har et max på 1000 tegn."
+            'message.max' => "beskeden har et max på 1000 tegn.",
+            'chat.required' => "beskeden kan kun skrives i en chat.",
+            'chat.digits_between' => "chat'en skal værer mellem 1 og 20 cifre lang."
         ];
     }
 }

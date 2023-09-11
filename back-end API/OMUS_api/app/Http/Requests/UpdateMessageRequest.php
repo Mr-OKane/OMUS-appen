@@ -22,7 +22,7 @@ class UpdateMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'Message' => "required|string|max:1000"
+            'message' => "required|string|max:1000"
         ];
     }
 
