@@ -15,7 +15,7 @@ class ChatRoom extends Model
         'name'
     ];
 
-    public function Chats(): HasMany
+    public function chats(): HasMany
     {
         return $this->hasMany(Chat::class, 'chat_room_id','id');
     }
