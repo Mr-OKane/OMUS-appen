@@ -12,7 +12,7 @@ class Message extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'Message'
+        'message'
     ];
 
     public function user():BelongsTo
