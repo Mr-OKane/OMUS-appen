@@ -47,7 +47,12 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function instrument(): BelongsToMany
+    public function address(): BelongsTo
+    {
+        return $this->belongsTo(Address::class,'address_id');
+    }
+
+    public function instruments(): BelongsToMany
     {
        return $this->belongsToMany(Instrument::class,'user_instruments','user_id','instrument_id');
     }
