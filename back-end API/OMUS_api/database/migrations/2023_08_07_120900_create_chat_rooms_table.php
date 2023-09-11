@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('chat_rooms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('chat_id')->constrained('chats')->nullOnDelete();
             $table->string('name');
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
