@@ -15,14 +15,26 @@ class ChatRoomController extends Controller
      */
     public function index(Request $request)
     {
-        $pagnationPerPage = $request->input('p') ?? 15;
-        if ($pagnationPerPage >= 1000){
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000){
             return response()->json(['message' => "1000+ pagnation per page is to much"]);
         }
 
-        $chatRoom = ChatRoom::withTrashed()->with('chats')->paginate($pagnationPerPage);
+        $chatRoom = ChatRoom::withTrashed()->with('chats')->paginate($paginationPerPage);
 
         return response()->json(['object' => $chatRoom]);
+    }
+
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ chatRooms per page is to much at a time"],400);
+        }
+        $chatRooms = ChatRoom::onlyTrashed()->with('chats')->paginate($paginationPerPage);
+
+        return response()->json(['message' => "Deleted chat rooms", 'object' => $chatRooms]);
     }
 
     /**
@@ -76,8 +88,25 @@ class ChatRoomController extends Controller
      */
     public function destroy(string $chatRoom)
     {
-        $object = ChatRoom::withTrashed()->firstWhere('id','=',$chatRoom);
+        $object = ChatRoom::withTrashed()->firstWhere('id','=', $chatRoom);
         $object->delete();
         return response()->json(['message' => "deleted the chat room successfully"]);
+    }
+
+    public function restore(string $chatRoom)
+    {
+        $object = ChatRoom::onlyTrashed()->firstWhere('id','=', $chatRoom);
+        $object->restore();
+        $object->chats;
+
+        return response(['message' => "restored the chatRoom", 'object' => $object],201);
+    }
+
+    public function forceDelete(string $chatRoom)
+    {
+        $object = ChatRoom::onlyTrashed()->firstWhere('id','=', $chatRoom);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Deleted the chatRoom completely"]);
     }
 }
