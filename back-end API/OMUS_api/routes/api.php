@@ -2,26 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AddressController;
-use App\Http\Controllers\CakeArrengementController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\ChatRoomController;
-use App\Http\Controllers\CityController;
-use App\Http\Controllers\IdeaController;
-use App\Http\Controllers\InstrumentController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderProductController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\PracticeDateController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SheetController;
-use App\Http\Controllers\StatusController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ZipCodeController;
 
 /*
 |--------------------------------------------------------------------------
