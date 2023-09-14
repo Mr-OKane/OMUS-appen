@@ -17,9 +17,21 @@ class InstrumentController extends Controller
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
-            return response()->json(['message' => "1000+ pagination per page is to much"],400);
+            return response()->json(['message' => "1000+ instruments per page is to much"],400);
         }
         $instruments = Instrument::with('users')->paginate($paginationPerPage);
+
+        return response()->json(['object' => $instruments]);
+    }
+
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ instruments per page is to much"],400);
+        }
+        $instruments = Instrument::onlyTrashed()->with('users')->paginate($paginationPerPage);
 
         return response()->json(['object' => $instruments]);
     }
@@ -72,5 +84,22 @@ class InstrumentController extends Controller
         $object = Instrument::withTrashed()->firstWhere('id','=', $instrument);
         $object->delete();
         return response()->json(['message' => "deleted the instrument successfully"]);
+    }
+
+    public function restore(string $instrument)
+    {
+        $object = Instrument::onlyTrashed()->firstWhere('id','=', $instrument);
+        $object->restore();
+
+        $object->users;
+        response()->json(['message' => "Restored the Instrument success",'object'  => $object]);
+    }
+
+    public function forceDelete(string $instrument)
+    {
+        $object = Instrument::onlyTrashed()->firstWhere('id','=', $instrument);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Deleted the Instrument completely"]);
     }
 }
