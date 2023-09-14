@@ -28,6 +28,14 @@ class OrderController extends Controller
         return response()->json(['object' => $orders]);
     }
 
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ orders per page is to much"],400);
+        }
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -95,5 +103,22 @@ class OrderController extends Controller
         $object->delete();
 
         return response()->json(['message' => "order deleted successfully"]);
+    }
+
+    public function restore(string $order)
+    {
+        $object = Order::onlyTrashed()->firstWhere('id','=', $order);
+        $object->restore();
+        $object->zipCodes->addresses;
+
+        return response()->json(['message' => "restored the order", 'object' => $object],201);
+    }
+
+    public function forceDelete(string $order)
+    {
+        $object = Order::onlyTrashed()->firstWhere('id','=', $order);
+        $object->forceDelete();
+
+        return response()->json(['message' => "deleted the order completely"]);
     }
 }
