@@ -6,7 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
-use Illuminate\Auth\Access\Response;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,6 +28,17 @@ class RoleController extends Controller
         return response()->json(['object' => $roles]);
     }
 
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ roles per page at a time is to much"],400);
+        }
+
+        $roles = Role::onlyTrashed()->with('permissions')->paginate($paginationPerPage);
+        return response()->json(['message' => "Deleted roles", 'object' => $roles]);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -731,5 +742,22 @@ class RoleController extends Controller
         $object = Role::withTrashed()->firstWhere('id','=', $role);
         $object->delete();
         return response()->json(['message' => "deleted the role successfully."]);
+    }
+
+    public function restore(string $role)
+    {
+        $object = Role::onlyTrashed()->firstWhere('id','=', $role);
+        $object->restore();
+        $object->permissions;
+
+        return response()->json(['message' => "restored the role", 'object' => $object],201);
+    }
+
+    public function forceDelete(string $role)
+    {
+        $object = Role::onlyTrashed()->firstWhere('id','=', $role);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Deleted the role completely"]);
     }
 }
