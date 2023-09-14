@@ -25,6 +25,20 @@ class ProductController extends Controller
         return response()->json(['object' => $products]);
     }
 
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ products per page is to much"],400);
+        }
+
+        $products = Product::onlyTrashed()->paginate($paginationPerPage);
+
+        return response()->json(['object' => $products]);
+
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -114,5 +128,22 @@ class ProductController extends Controller
         $object = Product::withTrashed()->firstWhere('id', '=', $product);
         $object->delete();
         return response()->json(['message' => "deleted the product successfully"]);
+    }
+
+    public function restore(string $product)
+    {
+        $object = Product::onlyTrashed()->firstWhere('id','=', $product);
+        $object->restore();
+        $object->orders;
+
+        return response()->json(['message' => "Restored the ",'object' => $object],201);
+    }
+
+    public function forceDelete(string $product)
+    {
+        $object = Product::onlyTrashed()->firstWhere('id','=', $product);
+        $object->forceDelete();
+
+        return response()->json(['message' => "deleted the product completely"]);
     }
 }
