@@ -14,13 +14,25 @@ class ChatController extends Controller
      */
     public function index(Request $request)
     {
-            $pagninationPerPage = $request['p'] ?? 15;
-            if ($pagninationPerPage >= 1000){
-                return response()->json(['message' => "1000+ is to much pagnation"]);
-            }
-            $chat = Chat::with('chatRoom')->with('messages')->paginate($pagninationPerPage);
+        $paginationPerPage = $request['p'] ?? 15;
+        if ($paginationPerPage >= 1000){
+            return response()->json(['message' => "1000+ is to much pagnation"]);
+        }
+        $chat = Chat::with('chatRoom')->with('messages')->paginate($paginationPerPage);
 
-            return response()->json(['object' => $chat]);
+        return response()->json(['object' => $chat]);
+    }
+
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ chats is to much at a time"],400);
+        }
+        $chats = Chat::onlyTrashed()->with('chatRoom')->with('messsages')->paginate($paginationPerPage);
+
+        response()->json(['message' => "deleted chats", 'object' => $chats]);
     }
 
     /**
@@ -80,6 +92,23 @@ class ChatController extends Controller
         $object->delete();
 
         return response()->json(['message' => "deleted the chat successfully"]);
+    }
 
+    public function restore(string $chat)
+    {
+        $object = Chat::onlyTrashed()->firstWhere('id','=', $chat);
+        $object->restore();
+        $object->messages;
+        $object->chatRoom;
+
+        return response()->json(['message' => "Restored the chat",'object' => $object],201);
+    }
+
+    public function forceDelete(string $chat)
+    {
+        $object = Chat::onlyTrashed()->firstWhere('id','=', $chat);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Chat Deleted completely"]);
     }
 }
