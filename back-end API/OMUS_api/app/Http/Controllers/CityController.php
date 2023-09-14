@@ -25,6 +25,19 @@ class CityController extends Controller
         return response()->json(['object' => $city]);
     }
 
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ cities per page is to much"],400);
+        }
+
+        $cities = City::onlyTrashed()->with('zipCodes.addresses');
+
+        return response()->json(['object' => $cities]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -76,5 +89,21 @@ class CityController extends Controller
         $object = City::withTrashed()->firstWhere('id','=', $city);
         $object->delete();
         return response()->json(['message' => "deleted the city successfully"]);
+    }
+
+    public function restore(string $city)
+    {
+        $object = City::onlyTrashed()->firstWhere('id','=', $city);
+        $object->restore();
+        $object->zipCodes->addresses;
+        return response(['message' => "Restored the city successfully", 'object' => $object]);
+    }
+
+    public function forceDelete(string $city)
+    {
+        $object = City::onlyTrashed()->firstWhere('id','=', $city);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Deleted the city completely"]);
     }
 }
