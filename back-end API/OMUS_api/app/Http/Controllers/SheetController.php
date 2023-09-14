@@ -17,12 +17,23 @@ class SheetController extends Controller
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
-            return response()->json(['message' => "1000+ pagination is to much"],400);
+            return response()->json(['message' => "1000+ sheets per page at a time is to much"],400);
         }
 
         $sheets = Sheet::with('user')->paginate($paginationPerPage);
 
         return response()->json(['object' => $sheets]);
+    }
+
+    public function deleted(Request $request)
+    {
+            $paginationPerPage = $request->input('p') ?? 15;
+            if ($paginationPerPage >= 1000)
+            {
+                return response()->json(['message' => "1000+ sheets per page at a time  is to much"],400);
+            }
+
+            $sheets = Sheet::onlyTrashed()->with('user')->paginate($paginationPerPage);
     }
 
     /**
@@ -84,5 +95,22 @@ class SheetController extends Controller
         $object->delete();
 
         return response()->json(['message' => "deleted the sheet."]);
+    }
+
+    public function restore(string $sheet)
+    {
+        $object = Sheet::onlyTrashed()->firstWhere('id','=', $sheet);
+        $object->restore();
+        $object->user;
+
+        return response()->json(['message' => "Restored the sheet",'object' => $object]);
+    }
+
+    public function forceDelete(string $sheet)
+    {
+        $object = Sheet::onlyTrashed()->firstWhere('id','=', $sheet);
+        $object->forceDelete();
+
+        return response()->json(['message' => "deleted the sheet completely"]);
     }
 }
