@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Models\Status;
 use App\Http\Requests\StoreStatusRequest;
 use App\Http\Requests\UpdateStatusRequest;
@@ -24,6 +25,18 @@ class StatusController extends Controller
         $statuses = Status::with('orders')->with('users')->paginate($paginationPerPage);
 
         return response()->json(['object' => $statuses]);
+    }
+
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ Statuses per page is to much"],400);
+        }
+        $statuses = Status::onlyTrashed()->with('orders')->with('users')->paginate($paginationPerPage);
+
+        return response()->json(['message' => "deleted statuses", 'object' => $statuses]);
     }
 
     /**
@@ -87,5 +100,22 @@ class StatusController extends Controller
         $object = Status::withTrashed()->firstWhere('id','=', $status);
         $object->delete();
         return response()->json(['message' => "deleted the status successfully"]);
+    }
+
+    public function restore(string $string)
+    {
+        $object = Product::onlyTrashed()->firstWhere('id','=', $string);
+        $object->restore();
+        $object->orders;
+        $object->users;
+
+        return response()->json(['message' => "restored the Status successfully", 'object' => $object],201);
+    }
+
+    public function forceDelete(string $product)
+    {
+        $object = Product::onlyTrashed()->firstWhere('id','=', $product);
+        $object->forceDelete();
+        return response()->json(['message' => "deleted the status completely"]);
     }
 }
