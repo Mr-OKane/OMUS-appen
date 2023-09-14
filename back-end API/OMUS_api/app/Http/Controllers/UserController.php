@@ -30,6 +30,20 @@ class UserController extends Controller
 
     }
 
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ users per page is to much"],400);
+        }
+        $users = User::onlyTrashed()->with('address.zipCode.city')->with('role')
+            ->with('status')->with('teams')->with('instruments')
+            ->paginate($paginationPerPage);
+
+        return response()->json(['message' => "All deleted users",'object' => $users]);
+    }
+
     public function userAddress(User $user, Request $request)
     {
 
@@ -164,5 +178,25 @@ class UserController extends Controller
         $object = User::withTrashed()->firstWhere('id','=', $user);
         $object->delete();
         return response()->json(['message' => "deleted the user successfully."]);
+    }
+
+    public function restore(string $user)
+    {
+        $object = User::onlyTrashed()->firstWhere('id','=', $user);
+        $object->restore();
+
+        $object->address->zipCode->city;
+        $object->role;
+        $object->status;
+
+        return response()->json(['message' => "restored the User successfully", 'object' => $object]);
+    }
+
+    public function forceDelete(string $user)
+    {
+        $object = User::onlyTrashed()->firstWhere('id','=', $user);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Deleted the user completely"]);
     }
 }
