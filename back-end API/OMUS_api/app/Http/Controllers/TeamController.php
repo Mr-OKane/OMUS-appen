@@ -26,6 +26,19 @@ class TeamController extends Controller
         return response()->json(['object' => $teams]);
     }
 
+    public function deleted(Request $request)
+    {
+      $paginationPerPage = $request->input('p') ?? 15;
+      if ($paginationPerPage >= 1000)
+      {
+          return response()->json(['message' => "1000+ teams per page is to much"],400);
+      }
+
+      $teams = Team::onlyTrashed()->with('users')->paginate($paginationPerPage);
+
+      return response()->json(['object' => $teams]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -88,5 +101,22 @@ class TeamController extends Controller
         $object->delete();
 
         return response()->json(['message' => "deleted the Team successfully"]);
+    }
+
+    public function restore(string $team)
+    {
+        $object = Team::onlyTrashed()->firstWhere('id','=', $team);
+        $object->restore();
+        $object->users;
+
+        return response()->json(['message' => "restored the team successfully", 'object' => $object]);
+    }
+
+    public function forceDelete(string $team)
+    {
+        $object = Team::onlyTrashed()->firstWhere('id','=', $team);
+        $object->forceDelete();
+
+        return response()->json(['message' => "deleted the team completely successfully"]);
     }
 }
