@@ -6,7 +6,6 @@ use App\Models\Address;
 use App\Http\Requests\StoreAddressRequest;
 use App\Http\Requests\UpdateAddressRequest;
 use Illuminate\Http\Request;
-use function Termwind\ask;
 
 class AddressController extends Controller
 {
@@ -22,6 +21,20 @@ class AddressController extends Controller
         $address = Address::with('zipCode.city')->paginate($paginationPerPage);
 
         return response()->json(['object' => $address]);
+    }
+
+    public function deleted(Request $request)
+    {
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ addresses per page is to much"],400);
+        }
+
+        $addresses = Address::onlyTrashed()->with('zipCode.city')
+            ->paginate($paginationPerPage);
+
+        return response()->json(['object' => $addresses]);
     }
 
     /**
@@ -40,7 +53,7 @@ class AddressController extends Controller
         $object->zipCode;
         $object->zipCode->city;
 
-        return response()->json(['message' => "created the address successfully",'object' => $object],201);
+        return response()->json(['message' => "Created the address successfully",'object' => $object],201);
     }
 
     /**
@@ -71,7 +84,7 @@ class AddressController extends Controller
         $object->zipCode()->associate($request['zipCode']);
         $object->save();
 
-        return response()->json(['message' => "updated the address",'object' => $object]);
+        return response()->json(['message' => "Updated the address",'object' => $object]);
     }
 
     /**
@@ -81,8 +94,24 @@ class AddressController extends Controller
     {
         $object = Address::withTrashed()->firstWhere('id','=', $address);
         $object->delete();
-        return response()->json(['message' => "deleted the address"]);
+        return response()->json(['message' => "Deleted the address"]);
     }
 
+    public function restore(string $address)
+    {
+        $object = Address::onlyTrashed()->firstWhere('id','=', $address);
+        $object->restore();
+        $object->zipCode;
+        $object->zipCode->city;
 
+        return response()->json(['message' => "Address restored successfully", 'object' => $object]);
+    }
+
+    public function forceDelete(string $address)
+    {
+        $object = Address::onlyTrashed()->firstWhere('id','=', $address);
+        $object->forceDelete();
+
+        return response()->json(['message' => "Deleted the address completely"]);
+    }
 }
