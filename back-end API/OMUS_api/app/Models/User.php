@@ -11,6 +11,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+enum UserStatus: string
+{
+    case Active = 'active';
+    case Inactive = 'inactive';
+}
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -45,6 +51,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
+        'status' => UserStatus::class
     ];
 
     public function address(): BelongsTo
@@ -70,11 +77,6 @@ class User extends Authenticatable
     public function sheets(): HasMany
     {
         return $this->hasMany(Sheet::class,'user_id','id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(Status::class,'status_id');
     }
 
     public function teams(): BelongsToMany

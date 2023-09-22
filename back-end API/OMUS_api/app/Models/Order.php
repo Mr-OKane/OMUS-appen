@@ -8,12 +8,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+enum OrderStatus: string
+{
+    case Pending = 'pending';
+    case Paid = 'paid';
+    case Accepted = 'accepted';
+    case Packaged = 'packaged';
+    case Sent = 'sent';
+    case Recived = 'recived';
+}
+
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'order_date'
+    ];
+
+    protected $casts = [
+        'status' => OrderStatus::class
     ];
 
     public function address(): BelongsTo
@@ -24,11 +38,6 @@ class Order extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class,'order_products', 'order_id','product_id');
-    }
-
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(Status::class, 'status_id');
     }
 
     public function user(): BelongsTo
