@@ -11,11 +11,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 enum OrderStatus: string
 {
     case Pending = 'pending';
-    case Paid = 'paid';
     case Accepted = 'accepted';
-    case Packaged = 'packaged';
-    case Sent = 'sent';
-    case Recived = 'recived';
+    case Processing = 'processing';
+    case Dispatched = 'dispatched';
+    case Delivered = 'delivered';
 }
 
 class Order extends Model
