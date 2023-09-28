@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -14,6 +15,8 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Product::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -27,6 +30,8 @@ class ProductController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted', Product::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -44,6 +49,9 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [Product::class,$user]);
+
         $request->validated();
         $search = Product::withTrashed()->firstWhere('name','=', $request['name']);
         if (!empty($search))
@@ -67,6 +75,9 @@ class ProductController extends Controller
      */
     public function show(string $product)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [Product::class,$user]);
+
         $object = Product::withTrashed()->firstWhere('id','=', $product);
         $object->orders;
 
@@ -78,10 +89,12 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, string $product)
     {
+        $object = Product::withTrashed()->firstWhere('id','=', $product);
+
+        $this->authorize('update', [$object,User::class]);
+
         $request->validated();
         $base64Image = base64_encode(file_get_contents($request->file('image')));
-
-        $object = Product::withTrashed()->firstWhere('id','=', $product);
 
         if ($object['name'] != $request['name'])
         {
@@ -125,6 +138,9 @@ class ProductController extends Controller
      */
     public function destroy(string $product)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [Product::class,$user]);
+
         $object = Product::withTrashed()->firstWhere('id', '=', $product);
         $object->delete();
         return response()->json(['message' => "deleted the product successfully"]);
@@ -132,6 +148,9 @@ class ProductController extends Controller
 
     public function restore(string $product)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [Product::class,$user]);
+
         $object = Product::onlyTrashed()->firstWhere('id','=', $product);
         $object->restore();
         $object->orders;
@@ -141,6 +160,9 @@ class ProductController extends Controller
 
     public function forceDelete(string $product)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [Product::class,$user]);
+
         $object = Product::onlyTrashed()->firstWhere('id','=', $product);
         $object->forceDelete();
 
