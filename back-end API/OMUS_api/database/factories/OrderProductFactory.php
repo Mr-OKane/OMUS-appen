@@ -21,7 +21,6 @@ class OrderProductFactory extends Factory
         return [
             'order_id' => Order::all()->random(1)[0]['id'],
             'product_id' => Product::all()->random(1)[0]['id'],
-            'total_price' => $this->faker->randomFloat(2,0,1000000),
         ];
     }
 }
