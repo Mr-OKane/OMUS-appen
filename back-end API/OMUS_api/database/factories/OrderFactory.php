@@ -21,7 +21,7 @@ class OrderFactory extends Factory
         $arrayValues = ['pending','accepted','processing','dispatched','delivered'];
 
         return [
-            'address_id' => Address::all()->random(1)[0]['id'],
+            'address_id' => User::all()->random(1)[0]['address_id'],
             'status' => $arrayValues[rand(0,4)],
             'user_id' => User::all()->random(1)[0]['id'],
             'order_date' => $this->faker->dateTime(),
