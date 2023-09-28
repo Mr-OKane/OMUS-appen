@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Http\Requests\StoreAddressRequest;
 use App\Http\Requests\UpdateAddressRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AddressController extends Controller
@@ -14,6 +15,8 @@ class AddressController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Address::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000){
             return response()->json(['message' => "to high of pagination"],400);
@@ -25,6 +28,8 @@ class AddressController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',Address::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -42,6 +47,9 @@ class AddressController extends Controller
      */
     public function store(StoreAddressRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create',[Address::class, $user]);
+
         $request->validated();
 
         $address = new Address();
@@ -61,6 +69,9 @@ class AddressController extends Controller
      */
     public function show(string $address)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view',[Address::class, $user]);
+
         $object = Address::withTrashed()->where('id', '=', $address)->first();
         $object->zipCode;
         $object->zipCode->city;
@@ -76,6 +87,7 @@ class AddressController extends Controller
         $request->validated();
 
         $object = Address::withTrashed()->where('id', '=', $address)->first();
+        $this->authorize('update',[$object, User::class]);
 
         if ($object['address'] != $request['address'])
         {
@@ -92,6 +104,9 @@ class AddressController extends Controller
      */
     public function destroy(string $address)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete',[Address::class, $user]);
+
         $object = Address::withTrashed()->firstWhere('id','=', $address);
         $object->delete();
         return response()->json(['message' => "Deleted the address"]);
@@ -99,6 +114,9 @@ class AddressController extends Controller
 
     public function restore(string $address)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore',[Address::class, $user]);
+
         $object = Address::onlyTrashed()->firstWhere('id','=', $address);
         $object->restore();
         $object->zipCode;
@@ -109,6 +127,9 @@ class AddressController extends Controller
 
     public function forceDelete(string $address)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete',[Address::class, $user]);
+
         $object = Address::onlyTrashed()->firstWhere('id','=', $address);
         $object->forceDelete();
 
