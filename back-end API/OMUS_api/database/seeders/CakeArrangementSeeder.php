@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\CakeArrengement;
+use App\Models\CakeArrangement;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class CakeArrengementSeeder extends Seeder
+class CakeArrangementSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        CakeArrengement::factory()->count(20)->create();
+        CakeArrangement::factory()->count(20)->create();
     }
 }
