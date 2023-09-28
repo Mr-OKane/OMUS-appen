@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ChatRoom;
 use App\Http\Requests\StoreChatRoomRequest;
 use App\Http\Requests\UpdateChatRoomRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use newrelic\DistributedTracePayload;
 
@@ -15,6 +16,8 @@ class ChatRoomController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',ChatRoom::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000){
             return response()->json(['message' => "1000+ pagnation per page is to much"]);
@@ -27,6 +30,8 @@ class ChatRoomController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',ChatRoom::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -42,6 +47,9 @@ class ChatRoomController extends Controller
      */
     public function store(StoreChatRoomRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [ChatRoom::class, $user]);
+
         $request->validated();
 
         $chatRoom = new ChatRoom();
@@ -59,6 +67,9 @@ class ChatRoomController extends Controller
      */
     public function show(string $chatRoom)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [ChatRoom::class,$user]);
+
         $object = ChatRoom::withTrashed()->firstWhere('id','=',$chatRoom);
         $object->chats;
 
@@ -70,9 +81,12 @@ class ChatRoomController extends Controller
      */
     public function update(UpdateChatRoomRequest $request, string $chatRoom)
     {
-        $request->validated();
 
         $object = ChatRoom::withTrashed()->firstWhere('id','=',$chatRoom);
+        $this->authorize('update', [$object,User::class]);
+
+        $request->validated();
+
         if ($object['name'] != $request['name'])
         {
             $object['name'] = $request['name'];
@@ -88,6 +102,9 @@ class ChatRoomController extends Controller
      */
     public function destroy(string $chatRoom)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [ChatRoom::class,$user]);
+
         $object = ChatRoom::withTrashed()->firstWhere('id','=', $chatRoom);
         $object->delete();
         return response()->json(['message' => "deleted the chat room successfully"]);
@@ -95,6 +112,9 @@ class ChatRoomController extends Controller
 
     public function restore(string $chatRoom)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [ChatRoom::class,$user]);
+
         $object = ChatRoom::onlyTrashed()->firstWhere('id','=', $chatRoom);
         $object->restore();
         $object->chats;
@@ -104,6 +124,9 @@ class ChatRoomController extends Controller
 
     public function forceDelete(string $chatRoom)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [ChatRoom::class,$user]);
+
         $object = ChatRoom::onlyTrashed()->firstWhere('id','=', $chatRoom);
         $object->forceDelete();
 
