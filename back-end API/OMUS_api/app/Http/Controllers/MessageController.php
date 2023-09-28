@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use App\Http\Requests\StoreMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,6 +16,8 @@ class MessageController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Message::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -36,6 +39,8 @@ class MessageController extends Controller
     public function store(StoreMessageRequest $request)
     {
         $user = auth('sanctum')->user();
+        $this->authorize('create', [Message::class,$user]);
+
         $request->validated();
 
         $message = new Message();
@@ -55,6 +60,8 @@ class MessageController extends Controller
      */
     public function show(string $message)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('view', [Message::class,$user]);
         $object = Message::withTrashed()->firstWhere('id','=', $message);
         $object->chat;
         $object->user;
@@ -67,9 +74,11 @@ class MessageController extends Controller
      */
     public function update(UpdateMessageRequest $request, string $message)
     {
-        $request->validated();
-
         $object = Message::withTrashed()->firstWhere('id','=', $message);
+
+        $this->authorize('update', [$object, User::class]);
+
+        $request->validated();
 
         if ($object['message'] != $request['message'])
         {
@@ -85,6 +94,9 @@ class MessageController extends Controller
      */
     public function destroy(string $message)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('delete', [Message::class,$user]);
+
         $object = Message::withTrashed()->firstWhere('id','=', $message);
         $object->delete();
         return response()->json(['message' => "deleted the message sucessfully."]);
