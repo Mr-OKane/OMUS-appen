@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use App\Http\Requests\StoreNotificationRequest;
 use App\Http\Requests\UpdateNotificationRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -14,6 +15,8 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Notification::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -30,6 +33,9 @@ class NotificationController extends Controller
      */
     public function store(StoreNotificationRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [Notification::class, $user]);
+
         $request->validated();
 
         $notification = new Notification();
@@ -44,6 +50,9 @@ class NotificationController extends Controller
      */
     public function show(string $notification)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [Notification::class, $user]);
+
         $object = Notification::withTrashed()->firstWhere('id','=', $notification);
         return response()->json(['object' => $object]);
     }
@@ -53,8 +62,11 @@ class NotificationController extends Controller
      */
     public function update(UpdateNotificationRequest $request, string $notification)
     {
-        $request->validated();
         $object = Notification::withTrashed()->firstWhere('id','=', $notification);
+
+        $this->authorize('update', [$object, User::class]);
+
+        $request->validated();
 
         if ($object['message'] != $request['message'])
         {
@@ -70,6 +82,9 @@ class NotificationController extends Controller
      */
     public function destroy(string $notification)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [Notification::class, $user]);
+
         $object = Notification::withTrashed()->firstWhere('id','=', $notification);
         $object->delete();
         return response(['message' => "deleted the notification"]);
