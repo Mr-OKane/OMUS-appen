@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Chat;
 use App\Http\Requests\StoreChatRequest;
 use App\Http\Requests\UpdateChatRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ChatController extends Controller
@@ -14,6 +15,8 @@ class ChatController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Chat::class);
+
         $paginationPerPage = $request['p'] ?? 15;
         if ($paginationPerPage >= 1000){
             return response()->json(['message' => "1000+ is to much pagnation"]);
@@ -25,6 +28,8 @@ class ChatController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',Chat::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -40,6 +45,9 @@ class ChatController extends Controller
      */
     public function store(StoreChatRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [Chat::class, $user]);
+
         $request->validated();
 
         $chat = new Chat();
@@ -58,6 +66,9 @@ class ChatController extends Controller
      */
     public function show(string $chat)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [Chat::class, $user]);
+
         $object = Chat::withTrashed()->firstWhere('id','=', $chat);
         $object->chatRoom;
         $object->messages;
@@ -73,6 +84,10 @@ class ChatController extends Controller
         $request->validated();
 
         $object = Chat::withTrashed()->firstWhere('id','=', $chat);
+
+        $this->authorize('create', [$object, User::class]);
+
+
         if ($object['name'] != $request['name'])
         {
             $object['name'] = $request['name'];
@@ -88,6 +103,9 @@ class ChatController extends Controller
      */
     public function destroy(string $chat)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [Chat::class, $user]);
+
         $object = Chat::withTrashed()->firstWhere('id','=', $chat);
         $object->delete();
 
@@ -96,6 +114,9 @@ class ChatController extends Controller
 
     public function restore(string $chat)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [Chat::class, $user]);
+
         $object = Chat::onlyTrashed()->firstWhere('id','=', $chat);
         $object->restore();
         $object->messages;
@@ -106,6 +127,9 @@ class ChatController extends Controller
 
     public function forceDelete(string $chat)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [Chat::class, $user]);
+
         $object = Chat::onlyTrashed()->firstWhere('id','=', $chat);
         $object->forceDelete();
 
