@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Models\User;
 use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +18,8 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Role::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -30,6 +33,8 @@ class RoleController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',Role::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -45,6 +50,9 @@ class RoleController extends Controller
      */
     public function store(StoreRoleRequest $request)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('create', [Role::class, $user]);
+
         $request->validated();
 
         $search = Role::withTrashed()->firstWhere('name','=', $request['name']);
@@ -64,6 +72,9 @@ class RoleController extends Controller
      */
     public function show(string $role)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('view', [Role::class, $user]);
+
         $object = Role::withTrashed()->firstWhere('id','=', $role);
         $object->permissions;
 
@@ -75,9 +86,11 @@ class RoleController extends Controller
      */
     public function update(UpdateRoleRequest $request, string $role)
     {
-        $request->validated();
-
         $object = Role::withTrashed()->firstWhere('id','=', $role);
+
+        $this->authorize('update', [$object,User::class]);
+
+        $request->validated();
 
         if ($object['name'] != $request['name'])
         {
@@ -101,6 +114,9 @@ class RoleController extends Controller
     {
 
         $user = auth('sanctum')->user();
+        $object = Role::withTrashed()->firstWhere('id','=', $role);
+        $this->authorize('permission_update', [$object, Role::class]);
+
         if ($user->role->permissions->contains(Permission::withTrashed()->firstWhere('name', '=', 'role.permission.update'))){
             $permissionIDs = [];
 
@@ -739,6 +755,9 @@ class RoleController extends Controller
      */
     public function destroy(string $role)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('delete', [Role::class, $user]);
+
         $object = Role::withTrashed()->firstWhere('id','=', $role);
         $object->delete();
         return response()->json(['message' => "deleted the role successfully."]);
@@ -746,6 +765,9 @@ class RoleController extends Controller
 
     public function restore(string $role)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('restore', [Role::class, $user]);
+
         $object = Role::onlyTrashed()->firstWhere('id','=', $role);
         $object->restore();
         $object->permissions;
@@ -755,6 +777,9 @@ class RoleController extends Controller
 
     public function forceDelete(string $role)
     {
+        $user = \auth('sanctum')->user();
+        $this->authorize('forceDelete', [Role::class, $user]);
+
         $object = Role::onlyTrashed()->firstWhere('id','=', $role);
         $object->forceDelete();
 
