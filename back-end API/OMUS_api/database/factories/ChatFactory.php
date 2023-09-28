@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Message;
+use App\Models\ChatRoom;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +19,7 @@ class ChatFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'message_id' => Message::all()->random(1)[0],['id'],
+            'chat_room_id' => ChatRoom::all()->random(1)[0]['id'],
         ];
     }
 }
