@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\City;
 use App\Http\Requests\StoreCityRequest;
 use App\Http\Requests\UpdateCityRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CityController extends Controller
@@ -14,6 +15,8 @@ class CityController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',City::class);
+
         $pagnationPerPage = $request->input('p') ?? 15;
 
         if ($pagnationPerPage >= 1000)
@@ -27,6 +30,8 @@ class CityController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',City::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -43,6 +48,9 @@ class CityController extends Controller
      */
     public function store(StoreCityRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [City::class,$user]);
+
         $request->validated();
 
         $city = new City();
@@ -57,6 +65,9 @@ class CityController extends Controller
      */
     public function show(string $city)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [City::class,$user]);
+
         $object = City::withTrashed()->firstWhere('id','=',$city);
         $object->zipCodes;
         $object->zipCodes->addresses;
@@ -69,9 +80,13 @@ class CityController extends Controller
      */
     public function update(UpdateCityRequest $request, string $city)
     {
-        $request->validated();
 
         $object = City::withTrashed()->firstWhere('id','=',$city);
+
+        $this->authorize('update', [$object,User::class]);
+
+        $request->validated();
+
         if ($object['city'] != $request['city'])
         {
             $object['city'] = $request['city'];
@@ -86,6 +101,9 @@ class CityController extends Controller
      */
     public function destroy(string $city)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [City::class, $user]);
+
         $object = City::withTrashed()->firstWhere('id','=', $city);
         $object->delete();
         return response()->json(['message' => "deleted the city successfully"]);
@@ -93,14 +111,21 @@ class CityController extends Controller
 
     public function restore(string $city)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [City::class,$user]);
+
         $object = City::onlyTrashed()->firstWhere('id','=', $city);
         $object->restore();
         $object->zipCodes->addresses;
+
         return response(['message' => "Restored the city successfully", 'object' => $object]);
     }
 
     public function forceDelete(string $city)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete',[City::class,$user]);
+
         $object = City::onlyTrashed()->firstWhere('id','=', $city);
         $object->forceDelete();
 
