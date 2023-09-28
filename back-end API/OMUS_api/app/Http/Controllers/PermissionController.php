@@ -14,6 +14,8 @@ class PermissionController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Permission::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
