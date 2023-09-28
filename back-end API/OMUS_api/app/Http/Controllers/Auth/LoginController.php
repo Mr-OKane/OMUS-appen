@@ -19,7 +19,7 @@ class LoginController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function authentiacte(Request $request){
+    public function login(Request $request){
 
         //validates email and password
         $credentials = $this->validate($request,[
@@ -31,7 +31,7 @@ class LoginController extends Controller
         $user = User::firstWhere('email','=',$request->email);
 
         if (Auth::guard('api')->attempt($credentials)) {
-            $token = $user->createToken('jwt token');
+            $token = $user->createToken('bearer token');
             return response()->json(['token' => $token->plainTextToken],200);
         }
 
@@ -47,6 +47,5 @@ class LoginController extends Controller
     public function logout()
     {
         Auth::logout();
-        return redirect()->intended('login');
     }
 }
