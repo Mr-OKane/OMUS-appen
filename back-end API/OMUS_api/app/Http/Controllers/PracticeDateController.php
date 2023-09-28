@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PracticeDate;
 use App\Http\Requests\StorePracticeDateRequest;
 use App\Http\Requests\UpdatePracticeDateRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PracticeDateController extends Controller
@@ -14,6 +15,8 @@ class PracticeDateController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',PracticeDate::class);
+
         $pagnationPerPage = $request->input('p') ?? 15;
         if ($pagnationPerPage >= 1000)
         {
@@ -27,6 +30,9 @@ class PracticeDateController extends Controller
      */
     public function store(StorePracticeDateRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [PracticeDate::class, $user]);
+
         $request->validated();
 
         $practiceDate = new PracticeDate();
@@ -41,9 +47,12 @@ class PracticeDateController extends Controller
      */
     public function show(string $practiceDate)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [PracticeDate::class, $user]);
+
         $object = PracticeDate::withTrashed()->firstWhere('id','=', $practiceDate);
         $object->users;
-        $object->cakeArrengements;
+        $object->CakeArrangements;
         return response()->json(['object' => $object]);
     }
 
@@ -52,8 +61,11 @@ class PracticeDateController extends Controller
      */
     public function update(UpdatePracticeDateRequest $request, string $practiceDate)
     {
-        $request->validated();
         $object = PracticeDate::withTrashed()->firstWhere('id','=', $practiceDate);
+
+        $this->authorize('update', [$object,User::class]);
+
+        $request->validated();
 
         if ($object['practice_date'] != $request['practiceDate'])
         {
@@ -69,6 +81,9 @@ class PracticeDateController extends Controller
      */
     public function destroy(string $practiceDate)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [PracticeDate::class, $user]);
+
         $object = PracticeDate::withTrashed()->firstWhere('id','=', $practiceDate);
         $object->delete();
         return response()->json(['message' => "deleted the practice date successfully"]);
