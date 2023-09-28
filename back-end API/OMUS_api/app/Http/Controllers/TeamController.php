@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Permission;
 use App\Models\Team;
 use App\Http\Requests\StoreTeamRequest;
 use App\Http\Requests\UpdateTeamRequest;
+use App\Models\User;
+use App\Policies\TeamPolicy;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use function Laravel\Prompts\text;
 
 
 class TeamController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Team::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -28,15 +36,17 @@ class TeamController extends Controller
 
     public function deleted(Request $request)
     {
-      $paginationPerPage = $request->input('p') ?? 15;
-      if ($paginationPerPage >= 1000)
-      {
-          return response()->json(['message' => "1000+ teams per page is to much"],400);
-      }
+        $this->authorize('viewAny_deleted', Team::class);
 
-      $teams = Team::onlyTrashed()->with('users')->paginate($paginationPerPage);
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ teams per page is to much"],400);
+        }
 
-      return response()->json(['object' => $teams]);
+        $teams = Team::onlyTrashed()->with('users')->paginate($paginationPerPage);
+
+        return response()->json(['object' => $teams]);
     }
 
     /**
@@ -44,6 +54,9 @@ class TeamController extends Controller
      */
     public function store(StoreTeamRequest $request)
     {
+        $user = auth("sanctum")->user();
+        $this->authorize('create',[Team::class,$user]);
+
         $request->validated();
 
         $search = Team::withTrashed()->firstWhere('name','=', $request['name']);
@@ -64,6 +77,9 @@ class TeamController extends Controller
      */
     public function show(string $team)
     {
+        $user = auth("sanctum")->user();
+        $this->authorize('view',[Team::class,$user]);
+
         $object = Team::withTrashed()->firstWhere('id','=', $team);
         $object->users;
 
@@ -75,8 +91,11 @@ class TeamController extends Controller
      */
     public function update(UpdateTeamRequest $request, string $team)
     {
-        $request->validated();
         $object = Team::withTrashed()->firstWhere('id','=', $team);
+
+        $this->authorize('update', [$object,User::class]);
+
+        $request->validated();
 
         if ($object['name'] != $request['name'])
         {
@@ -97,6 +116,9 @@ class TeamController extends Controller
      */
     public function destroy(string $team)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete',[Team::class, $user]);
+
         $object = Team::withTrashed()->firstWhere('id','=', $team);
         $object->delete();
 
@@ -105,6 +127,9 @@ class TeamController extends Controller
 
     public function restore(string $team)
     {
+        $user = auth("sanctum")->user();
+        $this->authorize('restore',[Team::class,$user]);
+
         $object = Team::onlyTrashed()->firstWhere('id','=', $team);
         $object->restore();
         $object->users;
@@ -114,6 +139,9 @@ class TeamController extends Controller
 
     public function forceDelete(string $team)
     {
+        $user = auth("sanctum")->user();
+        $this->authorize('forceDelete',[Team::class,$user]);
+
         $object = Team::onlyTrashed()->firstWhere('id','=', $team);
         $object->forceDelete();
 
