@@ -14,6 +14,8 @@ class InstrumentController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Instrument::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -26,6 +28,8 @@ class InstrumentController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',Instrument::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -41,6 +45,9 @@ class InstrumentController extends Controller
      */
     public function store(StoreInstrumentRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [Instrument::class,$user]);
+
         $request->validated();
 
         $instrument = new Instrument();
@@ -55,6 +62,9 @@ class InstrumentController extends Controller
      */
     public function show(string $instrument)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [Instrument::class,$user]);
+
         $object = Instrument::withTrashed()->firstWhere('id','=', $instrument);
         $object->users;
         return response()->json(['object' => $object]);
@@ -65,9 +75,12 @@ class InstrumentController extends Controller
      */
     public function update(UpdateInstrumentRequest $request, string $instrument)
     {
+        $object = Instrument::withTrashed()->firstWhere('id','=',$instrument);
+
+        $this->authorize('update',[$object,Instrument::class]);
+
         $request->validated();
 
-        $object = Instrument::withTrashed()->firstWhere('id','=',$instrument);
         if ($object['name'] != $request['name']){
             $object['name'] = $request['name'];
         }
@@ -81,6 +94,9 @@ class InstrumentController extends Controller
      */
     public function destroy(string $instrument)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [Instrument::class,$user]);
+
         $object = Instrument::withTrashed()->firstWhere('id','=', $instrument);
         $object->delete();
         return response()->json(['message' => "deleted the instrument successfully"]);
@@ -88,6 +104,9 @@ class InstrumentController extends Controller
 
     public function restore(string $instrument)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [Instrument::class,$user]);
+
         $object = Instrument::onlyTrashed()->firstWhere('id','=', $instrument);
         $object->restore();
 
@@ -97,6 +116,9 @@ class InstrumentController extends Controller
 
     public function forceDelete(string $instrument)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [Instrument::class,$user]);
+
         $object = Instrument::onlyTrashed()->firstWhere('id','=', $instrument);
         $object->forceDelete();
 
