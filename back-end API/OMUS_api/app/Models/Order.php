@@ -22,7 +22,7 @@ class Order extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'order_date'
+        'order_date',
     ];
 
     protected $casts = [
