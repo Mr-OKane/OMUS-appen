@@ -32,6 +32,7 @@ class User extends Authenticatable
         'phone_nr',
         'email',
         'password',
+        'status',
     ];
 
     /**
@@ -51,7 +52,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
-        'status' => UserStatus::class
+        'status' => UserStatus::class,
     ];
 
     public function address(): BelongsTo
