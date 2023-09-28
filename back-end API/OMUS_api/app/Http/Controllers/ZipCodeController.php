@@ -14,6 +14,8 @@ class ZipCodeController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',ZipCode::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -37,6 +39,9 @@ class ZipCodeController extends Controller
      */
     public function show(string $zipCode)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [ZipCode::class,$user]);
+
         $object = ZipCode::withTrashed()->firstWhere('id','=', $zipCode);
         $object->addresses;
         $object->city;
