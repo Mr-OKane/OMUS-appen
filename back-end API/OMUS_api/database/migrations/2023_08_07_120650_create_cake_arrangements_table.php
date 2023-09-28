@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cake_arrengements', function (Blueprint $table) {
+        Schema::create('cake_arrangements', function (Blueprint $table) {
             $table->foreignId('practice_date_id')->constrained('practice_dates')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->nullOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
         });
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cake_arrengements');
+        Schema::dropIfExists('cake_arrangements');
     }
 };
