@@ -18,7 +18,6 @@ class PracticeDateFactory extends Factory
     {
         return [
             'practice_date' => $this->faker->dateTime(),
-            ''
         ];
     }
 }
