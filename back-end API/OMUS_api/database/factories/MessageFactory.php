@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,6 +20,7 @@ class MessageFactory extends Factory
     {
         return [
             'message' => $this->faker->sentence(),
+            'chat_id' => Chat::all()->random(1)[0]['id'],
             'user_id' => User::all()->random(1)[0]['id'],
         ];
     }
