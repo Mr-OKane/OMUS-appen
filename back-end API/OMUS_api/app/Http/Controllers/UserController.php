@@ -17,6 +17,8 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',User::class);
+
         $paginationPerPage = $request->input() ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -32,6 +34,8 @@ class UserController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',User::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -87,6 +91,9 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [User::class,$user]);
+
         $request->validated();
         $search = User::withTrashed()->firstWhere('email', '=', $request['email']);
 
@@ -119,6 +126,9 @@ class UserController extends Controller
      */
     public function show(string $user)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [User::class,$user]);
+
        $object = User::withTrashed()->firstWhere('id','=', $user);
        $object->address->zipCode->city;
        $object->role;
@@ -175,6 +185,9 @@ class UserController extends Controller
      */
     public function destroy(string $user)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [User::class,$user]);
+
         $object = User::withTrashed()->firstWhere('id','=', $user);
         $object->delete();
         return response()->json(['message' => "deleted the user successfully."]);
@@ -182,6 +195,9 @@ class UserController extends Controller
 
     public function restore(string $user)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [User::class,$user]);
+
         $object = User::onlyTrashed()->firstWhere('id','=', $user);
         $object->restore();
 
@@ -194,6 +210,9 @@ class UserController extends Controller
 
     public function forceDelete(string $user)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [User::class,$user]);
+
         $object = User::onlyTrashed()->firstWhere('id','=', $user);
         $object->forceDelete();
 
