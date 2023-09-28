@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,8 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Order::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -30,6 +33,8 @@ class OrderController extends Controller
 
     public function deleted(Request $request)
     {
+        $this->authorize('viewAny_deleted',Order::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -41,6 +46,9 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [Order::class,$user]);
+
         $request->validated();
 
         $order = new Order();
@@ -65,6 +73,9 @@ class OrderController extends Controller
      */
     public function show(string $order)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [Order::class,$user]);
+
         $object = Order::withTrashed()->firstWhere('id','=', $order);
         $object->address->zipCode->city;
         $object->products;
@@ -79,8 +90,11 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, string $order)
     {
-        $request->validated();
         $object = Order::withTrashed()->firstWhere('id','=', $order);
+
+        $this->authorize('update', [$object, User::class]);
+
+        $request->validated();
 
         if ($object['order_date'] != $request['orderDate'])
         {
@@ -99,6 +113,9 @@ class OrderController extends Controller
      */
     public function destroy(string $order)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [Order::class,$user]);
+
         $object = Order::withTrashed()->firstWhere('id','=', $order);
         $object->delete();
 
@@ -107,6 +124,9 @@ class OrderController extends Controller
 
     public function restore(string $order)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [Order::class,$user]);
+
         $object = Order::onlyTrashed()->firstWhere('id','=', $order);
         $object->restore();
         $object->zipCodes->addresses;
@@ -116,6 +136,9 @@ class OrderController extends Controller
 
     public function forceDelete(string $order)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [Order::class,$user]);
+
         $object = Order::onlyTrashed()->firstWhere('id','=', $order);
         $object->forceDelete();
 
