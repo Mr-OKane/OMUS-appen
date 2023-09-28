@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sheet;
 use App\Http\Requests\StoreSheetRequest;
 use App\Http\Requests\UpdateSheetRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SheetController extends Controller
@@ -14,6 +15,8 @@ class SheetController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny',Sheet::class);
+
         $paginationPerPage = $request->input('p') ?? 15;
         if ($paginationPerPage >= 1000)
         {
@@ -27,13 +30,15 @@ class SheetController extends Controller
 
     public function deleted(Request $request)
     {
-            $paginationPerPage = $request->input('p') ?? 15;
-            if ($paginationPerPage >= 1000)
-            {
-                return response()->json(['message' => "1000+ sheets per page at a time  is to much"],400);
-            }
+        $this->authorize('viewAny_deleted',Sheet::class);
 
-            $sheets = Sheet::onlyTrashed()->with('user')->paginate($paginationPerPage);
+        $paginationPerPage = $request->input('p') ?? 15;
+        if ($paginationPerPage >= 1000)
+        {
+            return response()->json(['message' => "1000+ sheets per page at a time  is to much"],400);
+        }
+
+        $sheets = Sheet::onlyTrashed()->with('user')->paginate($paginationPerPage);
     }
 
     /**
@@ -41,6 +46,9 @@ class SheetController extends Controller
      */
     public function store(StoreSheetRequest $request)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('create', [Sheet::class,$user]);
+
         $request->validated();
 
         $sheet = new Sheet();
@@ -61,6 +69,9 @@ class SheetController extends Controller
      */
     public function show(string $sheet)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('view', [Sheet::class,$user]);
+
         $object = Sheet::withTrashed()->firstWhere('id','=', $sheet);
         $object->user;
 
@@ -72,9 +83,11 @@ class SheetController extends Controller
      */
     public function update(UpdateSheetRequest $request, string $sheet)
     {
-        $request->validated();
-
         $object = Sheet::withTrashed()->firstWhere('id','=', $sheet);
+
+        $this->authorize('update', [$object,User::class]);
+
+        $request->validated();
 
         if ($object['pdf'] != base64_encode(file_get_contents($request['pdf'])))
         {
@@ -91,6 +104,9 @@ class SheetController extends Controller
      */
     public function destroy(string $sheet)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('delete', [Sheet::class,$user]);
+
         $object = Sheet::withTrashed()->firstWhere('id', '=', $sheet);
         $object->delete();
 
@@ -99,6 +115,9 @@ class SheetController extends Controller
 
     public function restore(string $sheet)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('restore', [Sheet::class,$user]);
+
         $object = Sheet::onlyTrashed()->firstWhere('id','=', $sheet);
         $object->restore();
         $object->user;
@@ -108,6 +127,9 @@ class SheetController extends Controller
 
     public function forceDelete(string $sheet)
     {
+        $user = auth('sanctum')->user();
+        $this->authorize('forceDelete', [Sheet::class,$user]);
+
         $object = Sheet::onlyTrashed()->firstWhere('id','=', $sheet);
         $object->forceDelete();
 
