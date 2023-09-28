@@ -19,7 +19,6 @@ class ChatRoomFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'chat_id' => Chat::all()->random(1)[0]['id'],
         ];
     }
 }
