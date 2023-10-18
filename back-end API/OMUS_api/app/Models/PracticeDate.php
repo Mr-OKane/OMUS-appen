@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PracticeDate extends Model
@@ -14,6 +15,11 @@ class PracticeDate extends Model
     protected $fillable = [
         'practice_date'
     ];
+
+    public function cakeArrangements(): HasMany
+    {
+        return $this->hasMany(CakeArrangement::class,'practice_date_id','id');
+    }
 
     public function users(): BelongsToMany
     {
