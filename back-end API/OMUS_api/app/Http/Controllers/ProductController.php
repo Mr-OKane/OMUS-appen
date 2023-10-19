@@ -53,10 +53,16 @@ class ProductController extends Controller
         $this->authorize('create', [Product::class,$user]);
 
         $request->validated();
-        $search = Product::withTrashed()->firstWhere('name','=', $request['name']);
-        if (!empty($search))
+
+        $productExists = Product::withTrashed()->firstWhere('name','=', $request['name']);
+        if (!empty($productExists))
         {
-            return response()->json(['message' => "The products name allready exsist."],400);
+            if ($productExists->trashed())
+            {
+                $productExists->restore();
+                return response()->json(['message' => "The product already exists but was deleted and now is restored"],201);
+            }
+            return response()->json(['message' => "The products name already exist."],400);
         }
 
         $product = new Product();
@@ -98,8 +104,8 @@ class ProductController extends Controller
 
         if ($object['name'] != $request['name'])
         {
-            $search = Product::withTrashed()->firstWhere('name','=', $request['name']);
-            if (!empty($search))
+            $productExists = Product::withTrashed()->firstWhere('name','=', $request['name']);
+            if (!empty($productExists))
             {
                 return response()->json(['message' => "The product name already exist"],400);
             }
