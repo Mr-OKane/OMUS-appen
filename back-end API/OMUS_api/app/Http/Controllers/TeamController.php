@@ -59,9 +59,14 @@ class TeamController extends Controller
 
         $request->validated();
 
-        $search = Team::withTrashed()->firstWhere('name','=', $request['name']);
-        if (!empty($search))
+        $teamExists = Team::withTrashed()->firstWhere('name','=', $request['name']);
+        if (!empty($teamExists))
         {
+            if ($teamExists->trashed())
+            {
+                $teamExists->restore();
+                return response()->json(['message' => "The team exists and have been restored"],201);
+            }
             return response()->json(['message' => "the team name already exists"],400);
         }
 
@@ -99,8 +104,8 @@ class TeamController extends Controller
 
         if ($object['name'] != $request['name'])
         {
-            $search = Team::withTrashed()->firstWhere('name','=', $request['name']);
-            if (!empty($search))
+            $teamExists = Team::withTrashed()->firstWhere('name','=', $request['name']);
+            if (!empty($teamExists))
             {
                 return response()->json(['there is a team with that name'],400);
             }
