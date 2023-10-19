@@ -36,6 +36,17 @@ class IdeaController extends Controller
 
         $request->validated();
 
+        $ideaExists = Idea::withTrashed()->firstWhere('idea','=', $request['idea']);
+        if (!empty($ideaExists))
+        {
+            if ($ideaExists->trashed())
+            {
+                $ideaExists->restore();
+                return response()->json(['message' => "The Idea existed already but was deleted and now it is restored."]);
+            }
+            return response()->json(['message' => "The idea already exists"],400);
+        }
+
         $idea = new Idea();
         $idea['idea'] = $request['idea'];
         $idea->save();
@@ -66,10 +77,17 @@ class IdeaController extends Controller
 
         $request->validated();
 
-        if ($object['idea'] != $request['idea']){
-            $object['idea'] = $request['idea'];
+        $ideaExists = Idea::withTrashed()->firstWhere('idea','=', $request['idea']);
+        if (!empty($ideaExists) && $ideaExists['id'] != $object['id'])
+        {
+            return response()->json(['message' => "can't change the idea to one that exists"],400);
+        }else
+        {
+            if ($object['idea'] != $request['idea']){
+                $object['idea'] = $request['idea'];
+            }
+            $object->save();
         }
-        $object->save();
 
         return response()->json(['message' => "updated the idea successfully",'object' => $object]);
     }
