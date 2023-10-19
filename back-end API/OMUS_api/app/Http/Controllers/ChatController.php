@@ -49,6 +49,17 @@ class ChatController extends Controller
         $this->authorize('create', [Chat::class, $user]);
 
         $request->validated();
+        $chatExists = Chat::withTrashed()->firstWhere('name','=', $request['name']);
+
+        if (!empty($chatExists))
+        {
+            if ($chatExists->trashed())
+            {
+                $chatExists->restore();
+                return response()->json(['message' => "The chat already exists but was deleted and have been restored"],201);
+            }
+            return response()->json(['message' => "The chat already exists"],400);
+        }
 
         $chat = new Chat();
         $chat['name'] = $request['name'];
@@ -86,15 +97,23 @@ class ChatController extends Controller
         $object = Chat::withTrashed()->firstWhere('id','=', $chat);
 
         $this->authorize('create', [$object, User::class]);
+        $chatExits = Chat::withTrashed()->firstWhere('name','=', $request['name']);
 
-
-        if ($object['name'] != $request['name'])
+        if (!empty($chatExits) && $chatExits['id'] != $object['id'])
         {
-            $object['name'] = $request['name'];
+            return response()->json(['message' => "The chat already exists"],400);
         }
-        $object->chatRoom()->associate($request['chatRoom']);
+        else
+        {
+            if ($object['name'] != $request['name'])
+            {
+                $object['name'] = $request['name'];
+            }
+            $object->chatRoom()->associate($request['chatRoom']);
 
-        $object->save();
+            $object->save();
+        }
+
         return response()->json(['message' => "successfully updated the chat", 'object' => $object]);
     }
 
