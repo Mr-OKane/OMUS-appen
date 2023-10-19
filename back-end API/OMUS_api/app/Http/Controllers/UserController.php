@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserInstrumentRequest;
+use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\UpdateUserRoleRequest;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\User;
@@ -19,16 +22,17 @@ class UserController extends Controller
     {
         $this->authorize('viewAny',User::class);
 
-        $paginationPerPage = $request->input() ?? 15;
+        $paginationPerPage = $request->input('p') ?? 15;
+
         if ($paginationPerPage >= 1000)
         {
             return response()->json(['message' => "1000+ Users per page is to much"],400);
         }
-        $users = User::with('address.zipcode.city')->with('role')
-            ->with('status')->with('teams')->with('instruments')
-            ->paginate($paginationPerPage);
 
-        return  response()->json(['obejct' => $users]);
+        $users = User::with('address.zipcode.city')->with('role')->with('teams')
+            ->with('instruments')->paginate($paginationPerPage);
+
+        return  response()->json(['object' => $users]);
 
     }
 
@@ -42,7 +46,7 @@ class UserController extends Controller
             return response()->json(['message' => "1000+ users per page is to much"],400);
         }
         $users = User::onlyTrashed()->with('address.zipCode.city')->with('role')
-            ->with('status')->with('teams')->with('instruments')
+            ->with('teams')->with('instruments')
             ->paginate($paginationPerPage);
 
         return response()->json(['message' => "All deleted users",'object' => $users]);
@@ -95,11 +99,16 @@ class UserController extends Controller
         $this->authorize('create', [User::class,$user]);
 
         $request->validated();
-        $search = User::withTrashed()->firstWhere('email', '=', $request['email']);
+        $userExists = User::withTrashed()->firstWhere('email', '=', $request['email']);
 
-        if (!empty($search))
+        if (!empty($userExists))
         {
-            return response()->json(['message' => "the user already exist"],400);
+            if ($userExists->trashed())
+            {
+                $userExists->restore();
+                return response()->json(['message' => "The User already exists but was deleted and have been restored"],201);
+            }
+            return response()->json(['message' => "The user already exist"],400);
         }
 
         $user = new User();
@@ -108,9 +117,9 @@ class UserController extends Controller
         $user['phone_nr'] = $request['phoneNumber'];
         $user['email'] = $request['email'];
         $user['password'] = $request['password'];
+        $user['status'] = $request['status'];
         $this->userAddress($user, $request);
         $user->role()->associate($request['role']);
-        $user->status()->associate($request['status']);
         $user->save();
 
         $object = User::withTrashed()->firstWhere('id','=', $user['id']);
@@ -144,10 +153,10 @@ class UserController extends Controller
     {
         $request->validated();
 
-        $search = User::withTrashed()->firstWhere('email', '=', $request['email']);
+        $userExists = User::withTrashed()->firstWhere('email', '=', $request['email']);
         $object = User::withTrashed()->firstWhere('id','=', $user);
 
-        if (!empty($search))
+        if (!empty($userExists))
         {
             return response()->json(['message' => "the user already exist"],400);
         }
@@ -168,8 +177,11 @@ class UserController extends Controller
         {
             $object['email'] = $request['email'];
         }
-        $object->role()->associate($request['role']);
-        $object->status()->associate($request['status']);
+        if ($object['status'] != $request['status'])
+        {
+            $object['status'] = $request['status'];
+        }
+
         $this->userAddress($object, $request);
         $object->save();
 
@@ -178,6 +190,54 @@ class UserController extends Controller
         $object->status;
 
         return response()->json(['message' => "Updated the user successfully.", 'object' => $object]);
+    }
+
+    public function userRoleUpdate(UpdateUserRoleRequest $request,string $user)
+    {
+        $request->validated();
+
+        $object = User::withTrashed()->firstWhere('id', '=', $user);
+
+        $object->role()->associate($request['role']);
+
+        $object->save();
+    }
+
+    public function userInstrumentUpdate(UpdateUserInstrumentRequest $request, string $user)
+    {
+        $request->validated();
+
+        $object = User::withTrashed()->firstWhere('id','=', $user);
+
+        $object->instruments->sync($request->instrument);
+
+        $object->save();
+        return response()->json(['message' => "updated user instruments successfully",$object]);
+    }
+
+    public function userPasswordUpdate(UpdateUserPasswordRequest $request, string $user)
+    {
+        $request->validated();
+
+        $object = User::withTrashed()->firstWhere('id','=',$user);
+
+        if ($request['password'] == $object['password'])
+        {
+            return response()->json(['message' => "The new password can't be the same as the old"],400);
+        }
+
+        if ($request['password'] != $request['repeatPassword'])
+        {
+            return response()->json(['message' => "The password does not match"],400);
+        }
+        else
+        {
+            $object['password'] = $request['password'];
+            $object->save();
+        }
+
+        return response()->json(['message' => "changed the password successfully" ,'object' => $object]);
+
     }
 
     /**
