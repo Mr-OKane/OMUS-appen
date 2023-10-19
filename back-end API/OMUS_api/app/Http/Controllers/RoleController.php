@@ -55,9 +55,14 @@ class RoleController extends Controller
 
         $request->validated();
 
-        $search = Role::withTrashed()->firstWhere('name','=', $request['name']);
-        if (!empty($search)){
-            return response()->json(['message' => 'the role allready exists'],400);
+        $roleExists = Role::withTrashed()->firstWhere('name','=', $request['name']);
+        if (!empty($roleExists)){
+            if ($roleExists->trashed())
+            {
+                $roleExists->restore();
+                return response()->json(['message' => "The role exists but was deleted and now is restored"],201);
+            }
+            return response()->json(['message' => 'the role already exists'],400);
         }
 
         $role = new Role();
@@ -94,8 +99,9 @@ class RoleController extends Controller
 
         if ($object['name'] != $request['name'])
         {
-            $search = Role::withTrashed()->firstWhere('name','=', $request['name']);
-            if (!empty($search)){
+            $roleExists = Role::withTrashed()->firstWhere('name','=', $request['name']);
+            if (!empty($roleExists))
+            {
                 return response()->json(['message' => 'There already exists a role with that name'],400);
             }
             $object['name'] = $request['name'];
