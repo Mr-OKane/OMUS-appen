@@ -52,10 +52,24 @@ class AddressController extends Controller
 
         $request->validated();
 
-        $address = new Address();
-        $address['address'] = $request["address"];
-        $address->zipCode()->associate($request['zipCode']);
-        $address->save();
+        $addressExists = Address::withTrashed()->firstWhere('address','=', $request['address']);
+
+        if (!empty($addressExists))
+        {
+            if ($addressExists)
+            {
+                $addressExists->restore();
+                return response()->json(['message' => "The address already exists but was deleted and has been restored"],201);
+            }
+            return response()->json(['message' => "The address already exists"],400);
+        }
+        else
+        {
+            $address = new Address();
+            $address['address'] = $request["address"];
+            $address->zipCode()->associate($request['zipCode']);
+            $address->save();
+        }
 
         $object = Address::withTrashed()->where('id', '=', $address['id'])->first();
         $object->zipCode;
@@ -89,12 +103,21 @@ class AddressController extends Controller
         $object = Address::withTrashed()->where('id', '=', $address)->first();
         $this->authorize('update',[$object, User::class]);
 
-        if ($object['address'] != $request['address'])
+        $addressExists = Address::withTrashed()->firstWhere('address','=', $request['address']);
+
+        if (!empty($addressExists) && $object['id'] != $addressExists['id'])
         {
-            $object['address'] = $request['address'];
+           return response()->json(['message' => "address already exists"],400);
         }
-        $object->zipCode()->associate($request['zipCode']);
-        $object->save();
+        else
+        {
+            if ($object['address'] != $request['address'])
+            {
+                $object['address'] = $request['address'];
+            }
+            $object->zipCode()->associate($request['zipCode']);
+            $object->save();
+        }
 
         return response()->json(['message' => "Updated the address",'object' => $object]);
     }
