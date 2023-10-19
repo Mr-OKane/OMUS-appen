@@ -35,6 +35,16 @@ class PracticeDateController extends Controller
 
         $request->validated();
 
+        $practiceDateExists = PracticeDate::withTrashed()->firstWhere('practice_date','=', $request['practiceDate']);
+        if (!empty($practiceDateExists))
+        {
+            if ($practiceDateExists->trashed())
+            {
+                return response()->json(['message' => "The practice date exists but was deleted and now is restored"],201);
+            }
+            return response()->json(['message' => "The practice date already exists"]);
+        }
+
         $practiceDate = new PracticeDate();
         $practiceDate['practice_date'] = $request['practiceDate'];
         $practiceDate->save();
@@ -66,6 +76,12 @@ class PracticeDateController extends Controller
         $this->authorize('update', [$object,User::class]);
 
         $request->validated();
+
+        $practiceDateExists = PracticeDate::withTrashed()->firstWhere('practice_date','=', $request['practiceDate']);
+        if (!empty($practiceDateExists))
+        {
+            return response()->json(['message' => "The practice date already exists"],400);
+        }
 
         if ($object['practice_date'] != $request['practiceDate'])
         {
