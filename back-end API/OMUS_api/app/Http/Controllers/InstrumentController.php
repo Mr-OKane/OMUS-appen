@@ -50,6 +50,17 @@ class InstrumentController extends Controller
 
         $request->validated();
 
+        $instrumentExists = Instrument::withTrashed()->firstWhere('name','=', $request['name']);
+        if (!empty($instrumentExists))
+        {
+            if ($instrumentExists->trashed())
+            {
+                $instrumentExists->restore();
+                return response()->json(['message' => "The instrument exists but was deleted and now it has been restored"],201);
+            }
+            return response()->json(['message' => "The instrument already exists"],400);
+        }
+
         $instrument = new Instrument();
         $instrument['name'] = $request['name'];
         $instrument->save();
@@ -81,10 +92,17 @@ class InstrumentController extends Controller
 
         $request->validated();
 
-        if ($object['name'] != $request['name']){
-            $object['name'] = $request['name'];
+        $instrumentExists = Instrument::withTrashed()->firstWhere('name','=',$request['name']);
+        if (!empty($instrumentExists) && $instrumentExists['id'] != $object['id']){
+            return response()->json(['message' => "The instrument already exists"],400);
         }
-        $object->save();
+        else{
+            if ($object['name'] != $request['name']){
+                $object['name'] = $request['name'];
+            }
+
+            $object->save();
+        }
 
         return response()->json(['message' => "updated the instrument successfully",'object' => $object]);
     }
