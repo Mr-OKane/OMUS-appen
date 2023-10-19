@@ -53,6 +53,17 @@ class CityController extends Controller
 
         $request->validated();
 
+        $cityExists = City::withTrashed()->firstWhere('city', '=', $request['city']);
+        if (!empty($cityExists))
+        {
+            if($cityExists->trashed())
+            {
+                $cityExists->restore();
+               return response()->json(['message' => "The city already exists but was deleted and has now been restored"],201);
+            }
+            return response()->json(['message' => "The city already exists"],400);
+        }
+
         $city = new City();
         $city['city'] = $request['city'];
         $city->save();
@@ -87,11 +98,20 @@ class CityController extends Controller
 
         $request->validated();
 
-        if ($object['city'] != $request['city'])
+        $cityExists = City::withTrashed()->firstWhere('city', '=', $request['city']);
+
+        if (!empty($cityExists) && $object['id'] != $cityExists['id'])
         {
-            $object['city'] = $request['city'];
+            return response()->json(['message' => "Can't change a city name to one that exists"],400);
         }
-        $object->save();
+        else
+        {
+            if ($object['city'] != $request['city'])
+            {
+                $object['city'] = $request['city'];
+            }
+            $object->save();
+        }
 
         return response()->json(['message' => "updated the cities name successfully", 'object' => $object],200);
     }
