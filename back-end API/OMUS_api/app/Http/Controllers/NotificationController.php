@@ -38,6 +38,17 @@ class NotificationController extends Controller
 
         $request->validated();
 
+        $notificationExists = Notification::withTrashed()->firstWhere('message','=', $request['message']);
+        if (!empty($notificationExists))
+        {
+            if ($notificationExists->trashed())
+            {
+                $notificationExists->restore();
+                return response()->json(['message' => "The notification exists but was deleted and now it is restored"],201);
+            }
+            return response()->json(['message' => "notification already exists"],400);
+
+        }
         $notification = new Notification();
         $notification['message'] = $request['message'];
         $notification->save();
@@ -68,6 +79,11 @@ class NotificationController extends Controller
 
         $request->validated();
 
+        $notificationExists = Notification::withTrashed()->firstWhere('message','=', $request['message']);
+        if (!empty($notificationExists) && $notificationExists['id'] != $object['id'])
+        {
+            return response()->json(["can't change a Notification to one that exists"],400);
+        }
         if ($object['message'] != $request['message'])
         {
             $object['message'] = $request['message'];
