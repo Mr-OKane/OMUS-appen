@@ -24,7 +24,7 @@ class OrderController extends Controller
             return response()->json(['message' => "1000+ pagination per Page is to much"],400);
         }
 
-        $orders = Order::with('status')->with('user')
+        $orders = Order::with('user.address.zipCode.city')
             ->with('address.zipCode.city')->with('products')
             ->paginate($paginationPerPage);
 
@@ -40,6 +40,11 @@ class OrderController extends Controller
         {
             return response()->json(['message' => "1000+ orders per page is to much"],400);
         }
+
+        $orders = Order::onlyTrashed()->with('user.address.zipCode.city')
+            ->with('address.zipCode.city')->paginate($paginationPerPage);
+
+        return response()->json(['object' => $orders]);
     }
     /**
      * Store a newly created resource in storage.
@@ -53,7 +58,7 @@ class OrderController extends Controller
 
         $order = new Order();
         $order->address()->associate($request['address']);
-        $order->status()->associate($request['status']);
+        $order['status'] = $request['status'];
         $order->user()->associate($request['user']);
         $order->products()->sync($request['products']);
         $order['order_date'] = Carbon::now();
@@ -62,8 +67,8 @@ class OrderController extends Controller
         $object = Order::withTrashed()->firstWhere('id','=', $order['id']);
         $object->address->zipCode->city;
         $object->products;
-        $object->status;
-        $object->user;
+        $object->user->role;
+        $object->user->address->zipCode->city;
 
         return response()->json(['message' => "created the order successfully",'object' => $object],201);
     }
@@ -79,8 +84,8 @@ class OrderController extends Controller
         $object = Order::withTrashed()->firstWhere('id','=', $order);
         $object->address->zipCode->city;
         $object->products;
-        $object->status;
-        $object->user;
+        $object->user->role;
+        $object->user->address->zipCode->city;
 
         return response()->json(['object' => $object]);
     }
@@ -96,12 +101,11 @@ class OrderController extends Controller
 
         $request->validated();
 
-        if ($object['order_date'] != $request['orderDate'])
+        if ($object['status'] != $request['status'])
         {
-            $object['order_date'] = $request['orderDate'];
+            $object['status'] = $request['status'];
         }
         $object->address()->associate($request['address']);
-        $object->status()->associate($request['status']);
 
         $object->save();
 
