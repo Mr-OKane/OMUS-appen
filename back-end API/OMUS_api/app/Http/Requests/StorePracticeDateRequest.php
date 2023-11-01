@@ -22,15 +22,15 @@ class StorePracticeDateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'practiceDate' => "required|date_format:Y-m-d\TH:i"
+            'practiceDate' => "required|date_format:Y-m-d H:i:s"
         ];
     }
 
-    public function messages()
+    public function messages(): array
     {
         return [
             'practiceDate.required' => "øve datoen skal være valgt.",
-            'practiceDate.date_format' => "datoen skal være af format y-m-d H:i"
+            'practiceDate.date_format' => "datoen skal være af format Y-m-d H:i:s"
         ];
     }
 }
