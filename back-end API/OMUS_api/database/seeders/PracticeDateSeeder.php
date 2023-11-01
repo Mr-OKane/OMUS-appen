@@ -13,6 +13,6 @@ class PracticeDateSeeder extends Seeder
      */
     public function run(): void
     {
-        PracticeDate::factory()->count(50)->create();
+        PracticeDate::factory()->count(32)->create();
     }
 }
