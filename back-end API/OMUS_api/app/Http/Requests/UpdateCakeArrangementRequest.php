@@ -11,7 +11,7 @@ class UpdateCakeArrangementRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,19 @@ class UpdateCakeArrangementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'practiceDate' => "required|integer|digits_between:1,20",
+            'user'=> "required|integer|digits_between:1,20"
+        ];
+
+    }
+
+    public function messages()
+    {
+        return [
+            'practiceDate.required' => "brugeren skal have en dato den er linked med",
+            'practiceDate.digits_between' => "datoen skal være mellem 1 og 20 cifre i tal",
+            'user.required' => "Kageordnigen skal have en bruge til datoen",
+            'user.digits_between' => "Brugeren skal være mellem 1 og 20 cifre"
         ];
     }
 }

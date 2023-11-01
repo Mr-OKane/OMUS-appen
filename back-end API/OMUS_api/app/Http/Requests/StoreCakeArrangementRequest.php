@@ -11,7 +11,7 @@ class StoreCakeArrangementRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,19 @@ class StoreCakeArrangementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'practiceDate' => "required|date_format:Y-m-d H:i:s",
+            'user'=> "required|integer|digits_between:1,20"
+        ];
+
+    }
+
+    public function messages()
+    {
+        return [
+            'practiceDate.required' => "kageordningen skal have en dato.",
+            'practiceDate.date_format' => "datoen skal være af format y-m-d H:i",
+            'user.required' => "Kageordnigen skal have en bruge til datoen",
+            'user.digits_between' => "Brugeren skal være mellem 1 og 20 cifre"
         ];
     }
 }
