@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Address;
+use App\Models\Instrument;
 use App\Models\Role;
-use App\Models\Status;
 use App\Models\User;
 use App\Models\UserStatus;
 use App\Models\ZipCode;
@@ -26,11 +26,11 @@ class UserSeeder extends Seeder
         $arrayValues = ['active','inactive'];
 
         foreach ($records as $offset => $record){
-            User::firstOrCreate([
+            $user = User::firstOrCreate([
                 'address_id' => Address::withTrashed()->where('zip_code_id','=',
                     ZipCode::withTrashed()->firstWhere('zip_code','=',$record['Postnr'])['id'])
                     ->inRandomOrder()->first()['id'],
-                'role_id' => Role::all()->random(1)[0]['id'],
+                'role_id' => Role::withTrashed()->firstWhere('name', '=','elev')['id'],
                 'firstname' => explode(' ', $record['Navn'],2)[0],
                 'lastname' => explode(' ', $record['Navn'], 2)[1],
                 'email' => $record['Email'],
@@ -38,6 +38,8 @@ class UserSeeder extends Seeder
                 'password' => "Password1!",
                 'status' => $arrayValues[rand(0,1)]
             ]);
+
+            $user->instruments()->sync(Instrument::all()->random(2));
         }
     }
 }
