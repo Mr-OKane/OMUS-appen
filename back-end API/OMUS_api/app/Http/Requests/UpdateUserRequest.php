@@ -27,10 +27,9 @@ class UpdateUserRequest extends FormRequest
             'email' => "required|email:rfc",
             'phoneNumber' => "string|max:11",
             'address' => "required|string|max:255",
-            'zipCode' => "required|string|max:11",
-            'city' => "required|string|max:255",
-            'role' => "required|integer|digits_between:1,20",
-            'status' => "required|integer|digits_between:1,20",
+            'zipCode' => "string|max:11",
+            'city' => "string|max:255",
+            'status' => "required|string|in:active,inactive",
         ];
     }
 
@@ -50,10 +49,8 @@ class UpdateUserRequest extends FormRequest
             'zipCode.max' => "postnummeret har et max på 11 tegn.",
             'city.required' => "byen skal have en City.",
             'city.max' => "byen har et max på 255 tegn.",
-            'role.required' => "Brugeren skal have en rolle.",
-            'role.digits_between' => "rollens id skal være mellem 1 og 20 cifre.",
             'status.required' => "Brugeren skal have en status.",
-            'status.digits_between' => "Status iden skal være mellem 1 og 20 cifre.",
+            'status.in' => "Statusen skal være enten active eller inactive",
         ];
     }
 }

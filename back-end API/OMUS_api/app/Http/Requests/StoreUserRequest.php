@@ -24,14 +24,16 @@ class StoreUserRequest extends FormRequest
         return [
             'firstname' => "required|string|max:255",
             'lastname' => "required|string|max:255",
-            'email' => "required|email:rfc",
-            'password' => "required|string|min:8|max:50|regex:/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!¤£$#%&@{}$+?|<>*]).*$/|",
+            'email' => "unique:users,email| required|email:rfc",
+            'password' => ['required','string','min:8','max:50','regex:/^.*(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!¤£$#%&@{}$+?|<>*]).*$/i'],
             'phoneNumber' => "string|max:11",
             'address' => "required|string|max:255",
             'zipCode' => "required|string|max:10",
             'city' => "required|string|max:255",
             'role' => "required|integer|digits_between:1,20",
-            'status' => "required|integer|digits_between:1,20",
+            'status' => "required|string|in:active,inactive",
+            'instrument' => 'array|max:3',
+            'instrument.*' => 'integer|digits_between:1,20',
         ];
     }
 
@@ -57,7 +59,9 @@ class StoreUserRequest extends FormRequest
             'role.required' => "Brugeren skal have en rolle.",
             'role.digits_between' => "rollens id skal være mellem 1 og 20 cifre.",
             'status.required' => "Brugeren skal have en status.",
-            'status.digits_between' => "Status iden skal være mellem 1 og 20 cifre.",
+            'status.in' => "Statusen skal være enten active eller inactive",
+            'instrument.max' => "Man spiller ikke på mere end 3 instrumenter.",
+            'instrument.*.digits_between' => "Instrumentet har et max på 20 cifre."
         ];
     }
 }
