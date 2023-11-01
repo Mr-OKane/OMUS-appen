@@ -22,7 +22,7 @@ class StoreSheetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'User' => "required|integer|digits_between:1,20",
+            'user' => "required|integer|digits_between:1,20",
             'pdf' => "required|file"
         ];
     }
