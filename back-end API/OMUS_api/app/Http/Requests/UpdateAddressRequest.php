@@ -22,8 +22,8 @@ class UpdateAddressRequest extends FormRequest
     public function rules(): array
     {
         return [
-        'address|required|string|max:255',
-        'zipCode|required|integer|digits_between:1,20',
+            'address' => 'required|string|max:255',
+            'zipCode' => 'required|integer|digits_between:1,20',
         ];
     }
 
