@@ -17,6 +17,6 @@ class Instrument extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class,'user_instruments','instrument_id','user_id')->withTimestamps();
+        return $this->belongsToMany(User::class,'user_instruments','instrument_id','user_id');
     }
 }
