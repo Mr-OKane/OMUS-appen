@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +17,15 @@ class PracticeDateFactory extends Factory
      */
     public function definition(): array
     {
+        $year = Carbon::now()->year;
+        $startDate = Carbon::createFromDate($year,7,1,'Europe/Copenhagen');
+        $endDate = Carbon::createFromDate($year+1,6,31,'Europe/Copenhagen');
+
+        $min = strtotime($startDate);
+        $max = strtotime($endDate);
+        $randomDate = mt_rand($min,$max);
         return [
-            'practice_date' => $this->faker->dateTime(),
+            'practice_date' => date('Y-m-d H:i:s',$randomDate),
         ];
     }
 }
