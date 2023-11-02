@@ -68,7 +68,7 @@ class CityController extends Controller
         $city['city'] = $request['city'];
         $city->save();
 
-        return response()->json(['message' => "created ethe city successfully",'object' => $city],201);
+        return response()->json(['message' => "created the city successfully",'object' => $city],201);
     }
 
     /**
@@ -136,7 +136,6 @@ class CityController extends Controller
 
         $object = City::onlyTrashed()->firstWhere('id','=', $city);
         $object->restore();
-        $object->zipCodes->addresses;
 
         return response(['message' => "Restored the city successfully", 'object' => $object]);
     }
