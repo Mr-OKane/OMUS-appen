@@ -40,6 +40,7 @@ class PracticeDateController extends Controller
         {
             if ($practiceDateExists->trashed())
             {
+                $practiceDateExists->restore();
                 return response()->json(['message' => "The practice date exists but was deleted and now is restored"],201);
             }
             return response()->json(['message' => "The practice date already exists"]);
@@ -80,7 +81,7 @@ class PracticeDateController extends Controller
         $practiceDateExists = PracticeDate::withTrashed()->firstWhere('practice_date','=', $request['practiceDate']);
         if (!empty($practiceDateExists))
         {
-            return response()->json(['message' => "The practice date already exists"],400);
+            return response()->json(['message' => "Can't change The practice date to one that already exists"],400);
         }
 
         if ($object['practice_date'] != $request['practiceDate'])
