@@ -56,7 +56,7 @@ class AddressController extends Controller
 
         if (!empty($addressExists))
         {
-            if ($addressExists)
+            if ($addressExists->trashed())
             {
                 $addressExists->restore();
                 return response()->json(['message' => "The address already exists but was deleted and has been restored"],201);
@@ -107,7 +107,7 @@ class AddressController extends Controller
 
         if (!empty($addressExists) && $object['id'] != $addressExists['id'])
         {
-           return response()->json(['message' => "address already exists"],400);
+           return response()->json(['message' => "Can't change the address to one that already exists"],400);
         }
         else
         {
