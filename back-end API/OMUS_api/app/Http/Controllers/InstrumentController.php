@@ -93,8 +93,9 @@ class InstrumentController extends Controller
         $request->validated();
 
         $instrumentExists = Instrument::withTrashed()->firstWhere('name','=',$request['name']);
-        if (!empty($instrumentExists) && $instrumentExists['id'] != $object['id']){
-            return response()->json(['message' => "The instrument already exists"],400);
+        if (!empty($instrumentExists) && $instrumentExists['id'] != $object['id'])
+        {
+            return response()->json(['message' => "Can't change the instrument name to one that  already exists"],400);
         }
         else{
             if ($object['name'] != $request['name']){
