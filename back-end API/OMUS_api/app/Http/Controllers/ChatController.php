@@ -63,7 +63,7 @@ class ChatController extends Controller
 
         $chat = new Chat();
         $chat['name'] = $request['name'];
-        $chat->chatRoom()->associate($request['chatroom']);
+        $chat->chatRoom()->associate($request['chatRoom']);
         $chat->save();
 
         $object = Chat::withTrashed()->firstWhere('id','=', $chat['id']);
@@ -101,7 +101,7 @@ class ChatController extends Controller
 
         if (!empty($chatExits) && $chatExits['id'] != $object['id'])
         {
-            return response()->json(['message' => "The chat already exists"],400);
+            return response()->json(['message' => "Can't change the chat name to one that already exists"],400);
         }
         else
         {
