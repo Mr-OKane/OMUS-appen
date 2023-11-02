@@ -83,7 +83,7 @@ class MakeCakeArrangement extends Command
                 $query->where('cake_arrangements.created_at','BETWEEN', [$startDate, $endDate]);
         })
                 ->withCount('cakeArrangements')
-                ->has('cakeArrangements', '<', 3)
+                ->has('cakeArrangements', '<', 2)
                 ->get();
 
         return $userWithLessThen2Count->random(2);
