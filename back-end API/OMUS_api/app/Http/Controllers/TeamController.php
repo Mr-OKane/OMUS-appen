@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateTeamUserRequest;
 use App\Models\Permission;
 use App\Models\Team;
 use App\Http\Requests\StoreTeamRequest;
@@ -107,13 +108,26 @@ class TeamController extends Controller
             $teamExists = Team::withTrashed()->firstWhere('name','=', $request['name']);
             if (!empty($teamExists))
             {
-                return response()->json(['there is a team with that name'],400);
+                return response()->json(["Can't change the team name to one that already exists"],400);
             }
             $object['name'] =  $request['name'];
         }
         $object->save();
 
         return response()->json(['message' => "Updated the team successfully", 'object' => $object]);
+    }
+
+    public function teamUserUpdate(UpdateTeamUserRequest $request, string $team)
+    {
+        $request->validated();
+        $object = Team::withTrashed()->firstWhere('id','=', $team);
+
+        $this->authorize('team_update', [$object,User::class]);
+
+        $object->users()->sync($request['user']);
+        $object->save();
+
+        return response()->json(['message' => "Updated the team with users successfully successfully"]);
     }
 
     /**
