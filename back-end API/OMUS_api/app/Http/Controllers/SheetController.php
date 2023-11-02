@@ -85,13 +85,14 @@ class SheetController extends Controller
     {
         $object = Sheet::withTrashed()->firstWhere('id','=', $sheet);
 
-        $this->authorize('update', [$object,User::class]);
+        $this->authorize('update', [$object, User::class]);
 
         $request->validated();
 
-        if ($object['pdf'] != base64_encode(file_get_contents($request['pdf'])))
+        $pdf = base64_encode(file_get_contents($request['pdf']));
+        if ($object['pdf'] != $pdf)
         {
-            $object['pdf'] = base64_encode(file_get_contents($request['pdf']));
+            $object['pdf'] = $pdf;
         }
         $object->user()->associate($request['user']);
         $object->user;
