@@ -16,6 +16,10 @@ class MessageController extends Controller
      */
     public function index(Request $request)
     {
+        //
+    }
+    public function chatMessages(Request $request, string $chat)
+    {
         $this->authorize('viewAny',Message::class);
 
         $paginationPerPage = $request->input('p') ?? 15;
@@ -24,12 +28,8 @@ class MessageController extends Controller
             return response()->json(['message' => "1000+ messages per page is 2 much"],400);
         }
 
-        return response()->json();
-    }
-    public function chatMessages(string $chat)
-    {
-
-        $messages = Message::all()->where('chat_id','=', $chat);
+        $messages = Message::with('user')->with('chat.chatRoom')->where('chat_id','=', $chat)
+        ->paginate($paginationPerPage);
         return response()->json(['object' => $messages]);
     }
 
