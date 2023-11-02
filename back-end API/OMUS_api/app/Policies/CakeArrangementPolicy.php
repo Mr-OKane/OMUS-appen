@@ -56,7 +56,7 @@ class CakeArrangementPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, CakeArrangement $CakeArrangement): Response
+    public function delete(User $user): Response
     {
 
         return $user->role->permissions->contains(Permission::withTrashed()->firstWhere('name','=',"cakeArrangement.delete"))
