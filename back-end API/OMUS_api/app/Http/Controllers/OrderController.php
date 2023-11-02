@@ -60,9 +60,10 @@ class OrderController extends Controller
         $order->address()->associate($request['address']);
         $order['status'] = $request['status'];
         $order->user()->associate($request['user']);
-        $order->products()->sync($request['products']);
         $order['order_date'] = Carbon::now();
         $order->save();
+
+        $order->products()->sync($request['products']);
 
         $object = Order::withTrashed()->firstWhere('id','=', $order['id']);
         $object->address->zipCode->city;
