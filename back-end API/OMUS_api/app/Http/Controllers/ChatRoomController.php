@@ -103,12 +103,13 @@ class ChatRoomController extends Controller
         $chatRoomExists = ChatRoom::withTrashed()->firstWhere('name','=',$request['name']);
         if (!empty($chatRoomExists) && $object['id'] != $chatRoomExists['id'])
         {
-            if ($object['name'] != $request['name'])
-            {
-                $object['name'] = $request['name'];
-            }
-            $object->save();
+            return response()->json(['message' => "can't change the chat room name to a already exists"]);
         }
+        if ($object['name'] != $request['name'])
+        {
+            $object['name'] = $request['name'];
+        }
+        $object->save();
 
         return response()->json(['message' => "updated the chat room successfully",'object' => $object]);
     }
