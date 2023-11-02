@@ -24,7 +24,7 @@ class TeamPolicy
     public function viewAny_Deleted()
     {
         $user = auth("sanctum")->user();
-        return $user->role->permissions->contains(Permission::withTrashed()->firstWhere('name','=',"team.deleted.viewAny"))
+        return $user->role->permissions->contains(Permission::withTrashed()->firstWhere('name','=',"team.viewAny.deleted"))
             ? Response::allow()
             : Response::deny('You are not the chosen one',403);
     }
