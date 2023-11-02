@@ -71,9 +71,13 @@ class ProductController extends Controller
         $product['description'] = $request['description'];
         $product['image'] = base64_encode(file_get_contents($request->file('image')));
         $product['price'] = $request['price'];
-        $product['ammount'] = $request['ammount'];
+        $product['amount'] = $request['amount'];
 
-        return response()->json(['message' => "Created the product", 'object' => $product]);
+        $product->save();
+
+        $object = Product::withTrashed()->firstWhere('id','=', $product['id']);
+
+        return response()->json(['message' => "Created the product", 'object' => $object]);
     }
 
     /**
@@ -107,7 +111,7 @@ class ProductController extends Controller
             $productExists = Product::withTrashed()->firstWhere('name','=', $request['name']);
             if (!empty($productExists))
             {
-                return response()->json(['message' => "The product name already exist"],400);
+                return response()->json(['message' => "Can't change the product name to one that already exist"],400);
             }
             $object['name'] = $request['name'];
         }
