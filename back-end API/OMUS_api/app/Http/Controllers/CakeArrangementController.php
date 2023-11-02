@@ -7,6 +7,7 @@ use App\Http\Requests\StoreCakeArrangementRequest;
 use App\Http\Requests\UpdateCakeArrangementRequest;
 use App\Models\PracticeDate;
 use App\Models\User;
+use Carbon\Carbon;
 use http\QueryString;
 use Illuminate\Http\Request;
 
@@ -41,32 +42,35 @@ class CakeArrangementController extends Controller
         $this->authorize('create',[CakeArrangement::class, $user]);
 
         $request->validated();
-
         $practiceDate = PracticeDate::withoutTrashed()->firstWhere('practice_date','=', $request['practiceDate']);
-        $practiceDates = CakeArrangement::withoutTrashed()->where('practice_date_id', '=', $practiceDate['id']);
-
-        if ($practiceDates->count() == 2)
-        {
-            return response()->json(['message' => "there is already 2 users for that practice dates"],400);
-        }
 
         $cakeArrangement = new CakeArrangement();
         if (empty($practiceDate))
         {
             $newPracticeDate = new PracticeDate();
-            $newPracticeDate['practiceDate'] = $request['practiceDate'];
+            $newPracticeDate['practice_date'] = $request['practiceDate'];
             $newPracticeDate->save();
 
             $cakeArrangement->user()->associate($request['user']);
             $cakeArrangement->practiceDate()->associate($newPracticeDate['id']);
         }
         else {
+            $practiceDates = CakeArrangement::where('practice_date_id', '=', $practiceDate['id']);
+
+            if ($practiceDates->count() >= 2)
+            {
+                return response()->json(['message' => "there is already 2 users for that practice dates"],400);
+            }
+            if ($practiceDates->first()['user_id'] == $request['user'])
+            {
+                return response()->json(['message' => "The user given is already on that day."]);
+            }
             $cakeArrangement->practiceDate()->associate($practiceDate);
             $cakeArrangement->user()->associate($request['user']);
         }
         $cakeArrangement->save();
 
-        $object = CakeArrangement::withTrashed()->firstWhere('id','=', $cakeArrangement['id']);
+        $object = CakeArrangement::where('id','=', $cakeArrangement['id'])->first();
         $object->practiceDate;
         $object->user;
 
@@ -82,7 +86,7 @@ class CakeArrangementController extends Controller
         $user = auth('sanctum')->user();
         $this->authorize('view',[CakeArrangement::class, $user]);
 
-        $object = CakeArrangement::withoutTrashed()->firstWhere('id','=', $cakeArrangement);
+        $object = CakeArrangement::where('id','=', $cakeArrangement)->first();
         $object->user;
         $object->practiceDate;
 
@@ -94,7 +98,7 @@ class CakeArrangementController extends Controller
      */
     public function update(UpdateCakeArrangementRequest $request, string $cakeArrangement)
     {
-        $object = CakeArrangement::withTrashed()->firstWhere('id','=', $cakeArrangement);
+        $object = CakeArrangement::where('id','=', $cakeArrangement)->first();
         $this->authorize('update',[$object, User::class]);
 
         $request->validated();
@@ -122,7 +126,7 @@ class CakeArrangementController extends Controller
         $user = auth('sanctum')->user();
         $this->authorize('delete',[CakeArrangement::class, $user]);
 
-        $object = CakeArrangement::withTrashed()->firstWhere('id','=', $cakeArrangement);
+        $object = CakeArrangement::where('id','=', $cakeArrangement)->first();
         $object->delete();
         return response()->json(['message' => "Deleted the Cake arrangement successfully"]);
     }
