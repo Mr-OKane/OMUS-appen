@@ -104,6 +104,14 @@ class UserPolicy
             : Response::deny('You are not the chosen one',403);
     }
 
+    public function team_update(User $user): Response
+    {
+        return $user->role->permissions->contains(Permission::withTrashed()
+        ->firstWhere('name','=','user.team.update'))
+            ? Response::allow()
+            : Response::deny('You are not the chosen one',403);
+    }
+
     /**
      * Determine whether the user can delete the model.
      */
