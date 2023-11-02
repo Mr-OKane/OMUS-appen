@@ -7,11 +7,13 @@ use App\Http\Requests\UpdateUserInstrumentRequest;
 use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\UpdateUserRoleRequest;
+use App\Http\Requests\UpdateUserTeamRequest;
 use App\Models\Address;
 use App\Models\City;
 use App\Models\User;
 use App\Models\ZipCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -54,7 +56,6 @@ class UserController extends Controller
 
     public function userAddress(User $user, Request $request)
     {
-
         $address = Address::withoutTrashed()->firstWhere('address','=', $request['address']);
         $zipCode = ZipCode::withoutTrashed()->firstWhere('zip_code','=', $request['zipCode']);
         $city = City::withoutTrashed()->firstWhere('city','=', $request['city']);
@@ -74,10 +75,12 @@ class UserController extends Controller
                     $newCity->save();
 
                     $newZipCode->city()->associate($newCity['id']);
-                }else
+                }
+                else
                 {
                     $newZipCode->city()->associate($city['id']);
                 }
+
                 $newZipCode->save();
 
                 $newAddress->zipCode()->associate($newZipCode['id']);
@@ -87,7 +90,7 @@ class UserController extends Controller
             }
         }else
         {
-            $user->address()->associate($request['address']);
+            $user->address()->associate($address);
         }
     }
     /**
@@ -111,18 +114,19 @@ class UserController extends Controller
             return response()->json(['message' => "The user already exist"],400);
         }
 
-        $user = new User();
-        $user['first_name'] = $request['firstname'];
-        $user['last_name'] = $request['lastname'];
-        $user['phone_nr'] = $request['phoneNumber'];
-        $user['email'] = $request['email'];
-        $user['password'] = $request['password'];
-        $user['status'] = $request['status'];
-        $this->userAddress($user, $request);
-        $user->role()->associate($request['role']);
-        $user->save();
+        $newUser = new User();
+        $newUser['firstname'] = $request['firstname'];
+        $newUser['lastname'] = $request['lastname'];
+        $newUser['phone_nr'] = $request['phoneNumber'];
+        $newUser['email'] = $request['email'];
+        $newUser['password'] = $request['password'];
+        $newUser['status'] = $request['status'];
+        $this->userAddress($newUser, $request);
+        $newUser->role()->associate($request['role']);
+        $newUser->instruments()->sync($request['instrument']);
+        $newUser->save();
 
-        $object = User::withTrashed()->firstWhere('id','=', $user['id']);
+        $object = User::withTrashed()->firstWhere('id','=', $newUser['id']);
         $object->address->zipCode->city;
         $object->role;
         $object->status;
@@ -135,13 +139,12 @@ class UserController extends Controller
      */
     public function show(string $user)
     {
-        $user = auth('sanctum')->user();
-        $this->authorize('view', [User::class,$user]);
+        $authUser = auth('sanctum')->user();
+        $this->authorize('view', [User::class, $authUser]);
 
        $object = User::withTrashed()->firstWhere('id','=', $user);
        $object->address->zipCode->city;
        $object->role;
-       $object->status;
 
        return response()->json(['object' => $object]);
     }
@@ -156,18 +159,19 @@ class UserController extends Controller
         $userExists = User::withTrashed()->firstWhere('email', '=', $request['email']);
         $object = User::withTrashed()->firstWhere('id','=', $user);
 
+        $this->authorize('update',[$object, User::class]);
         if (!empty($userExists))
         {
             return response()->json(['message' => "the user already exist"],400);
         }
 
-        if ($object['first_name'] != $request['firstname'])
+        if ($object['firstname'] != $request['firstname'])
         {
-            $object['first_name'] != $request['firstname'];
+            $object['firstname'] != $request['firstname'];
         }
-        if ($object['last_name'] != $request['lastname'])
+        if ($object['lastname'] != $request['lastname'])
         {
-            $object['last_name'] != $request['lastname'];
+            $object['lastname'] != $request['lastname'];
         }
         if ($object['phone_nr'] != $request['phoneNumber'])
         {
@@ -192,34 +196,26 @@ class UserController extends Controller
         return response()->json(['message' => "Updated the user successfully.", 'object' => $object]);
     }
 
-    public function userRoleUpdate(UpdateUserRoleRequest $request,string $user)
-    {
-        $request->validated();
-
-        $object = User::withTrashed()->firstWhere('id', '=', $user);
-
-        $object->role()->associate($request['role']);
-
-        $object->save();
-    }
-
     public function userInstrumentUpdate(UpdateUserInstrumentRequest $request, string $user)
     {
-        $request->validated();
-
         $object = User::withTrashed()->firstWhere('id','=', $user);
 
-        $object->instruments->sync($request->instrument);
+        $this->authorize('instrument_update',[$object,User::class]);
+        $request->validated();
+
+        $object->instruments()->sync($request['instrument']);
 
         $object->save();
+        $object->instruments;
         return response()->json(['message' => "updated user instruments successfully",$object]);
     }
 
     public function userPasswordUpdate(UpdateUserPasswordRequest $request, string $user)
     {
-        $request->validated();
-
         $object = User::withTrashed()->firstWhere('id','=',$user);
+        $this->authorize('password_update',[$object,User::class]);
+
+        $request->validated();
 
         if ($request['password'] == $object['password'])
         {
@@ -240,13 +236,43 @@ class UserController extends Controller
 
     }
 
+    public function userRoleUpdate(UpdateUserRoleRequest $request,string $user)
+    {
+        $object = User::withTrashed()->firstWhere('id', '=', $user);
+        $this->authorize('role_update',[$object,User::class]);
+
+        $request->validated();
+
+        $object->role()->associate($request['role']);
+
+        $object->save();
+
+        return response()->json(['message' => "Updated the user role successfully", 'object' => $object]);
+    }
+
+    public function userTeamUpdate(UpdateUserTeamRequest $request, string $user)
+    {
+
+        $object = User::withTrashed()->firstWhere('id','=', $user);
+        $this->authorize('team_update',[$object,User::class]);
+
+        $request->validated();
+
+        $object->teams()->sync($request['team']);
+        $object->save();
+
+        $object->teams;
+
+        return response()->json(['message' => "Updated the user with teams successfully",'object' => $object]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $user)
     {
-        $user = auth('sanctum')->user();
-        $this->authorize('delete', [User::class,$user]);
+        $authUser = auth('sanctum')->user();
+        $this->authorize('delete', [User::class,$authUser]);
 
         $object = User::withTrashed()->firstWhere('id','=', $user);
         $object->delete();
@@ -255,8 +281,8 @@ class UserController extends Controller
 
     public function restore(string $user)
     {
-        $user = auth('sanctum')->user();
-        $this->authorize('restore', [User::class,$user]);
+        $authUser = auth('sanctum')->user();
+        $this->authorize('restore', [User::class,$authUser]);
 
         $object = User::onlyTrashed()->firstWhere('id','=', $user);
         $object->restore();
@@ -270,8 +296,8 @@ class UserController extends Controller
 
     public function forceDelete(string $user)
     {
-        $user = auth('sanctum')->user();
-        $this->authorize('forceDelete', [User::class,$user]);
+        $authUser = auth('sanctum')->user();
+        $this->authorize('forceDelete', [User::class,$authUser]);
 
         $object = User::onlyTrashed()->firstWhere('id','=', $user);
         $object->forceDelete();
