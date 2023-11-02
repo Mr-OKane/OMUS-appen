@@ -100,9 +100,9 @@ class RoleController extends Controller
         if ($object['name'] != $request['name'])
         {
             $roleExists = Role::withTrashed()->firstWhere('name','=', $request['name']);
-            if (!empty($roleExists))
+            if (!empty($roleExists) && $object['id'] != $roleExists['id'])
             {
-                return response()->json(['message' => 'There already exists a role with that name'],400);
+                return response()->json(['message' => "can't change the role name one that already"],400);
             }
             $object['name'] = $request['name'];
         }
@@ -534,12 +534,6 @@ class RoleController extends Controller
                 );
             }
 
-            if (!empty($request['role_permission_viewAny'])){
-                array_push($permissionIDs,
-                    Permission::firstWhere('name','=','role.permission.viewAny')->id
-                );
-            }
-
             if (!empty($request['role_create'])){
                 array_push($permissionIDs,
                     Permission::firstWhere('name','=','role.create')->id
@@ -749,11 +743,11 @@ class RoleController extends Controller
                     Permission::firstWhere('name','=','zipcode.view')->id
                 );
             }
-
-            $role->permissions()->sync($permissionIDs);
+            $object->permissions()->sync($permissionIDs);
         }
+        $object->permissions;
 
-        return response()->json(['message' => 'updated the permissions var successfully added to the role','object' => $role],200);
+        return response()->json(['message' => 'updated the permissions var successfully added to the role','object' => $object],200);
     }
 
     /**
