@@ -68,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::delete('instruments/{id}/forceDelete',[InstrumentController::class, 'forceDelete']);
 
     // Message
-    Route::get('messages/{chat_id}',[MessageController::class,'chatMessages']);
+    Route::get('messages/chat/{chat_id}',[MessageController::class,'chatMessages']);
 
     // Order
     Route::get('orders/deleted',[OrderController::class, 'deleted']);
@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::delete('products/{id}/forceDelete',[ProductController::class,'forceDelete']);
 
     // Role
+    Route::put('roles/{id}/rolePermission',[RoleController::class,'rolePermissionsUpdate']);
     Route::get('roles/deleted', [RoleController::class,'deleted']);
     Route::get('roles/{id}/restore', [RoleController::class, 'restore']);
     Route::delete('roles/{id}/forceDelete', [RoleController::class, 'forceDelete']);
@@ -91,11 +92,16 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::delete('sheets/{id}/forceDelete', [SheetController::class, 'forceDelete']);
 
     // Team
+    Route::put('teams/{id}/teamUserUpdate', [TeamController::class, 'teamUserUpdate']);
     Route::get('teams/deleted', [TeamController::class,'deleted']);
     Route::get('teams/{id}/restore', [TeamController::class,'restore']);
     Route::delete('teams/{id}/forceDelete',[TeamController::class,'forceDelete']);
 
     // User
+    Route::put('users/{id}/userInstrumentUpdate', [UserController::class, 'userInstrumentUpdate']);
+    Route::put('users/{id}/userPasswordUpdate', [UserController::class, 'userPasswordUpdate']);
+    Route::put('users/{id}/userRoleUpdate', [UserController::class, 'userRoleUpdate']);
+    Route::put('users/{id}/userTeamUpdate', [UserController::class, 'userTeamUpdate']);
     Route::get('users/deleted',[UserController::class, 'deleted']);
     Route::get('users/{id}/restore',[UserController::class, 'restore']);
     Route::delete('users/{id}/forceDelete',[UserController::class,'forceDelete']);
