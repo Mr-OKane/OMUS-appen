@@ -75,7 +75,7 @@ class MakeCakeArrangement extends Command
 
     private function cakeArrangementUserCount()
     {
-        $userWithLessThen2Count = User::withoutTrashed()->with('cakeArrangements', function ($query) {
+        $userWithLessThen2Count = User::withoutTrashed()->where('status','=','active')->with('cakeArrangements', function ($query) {
                 $year = Carbon::now()->year;
                 $startDate = Carbon::createFromDate($year,7,1,'Europe/Copenhagen');
                 $endDate = Carbon::createFromDate($year+1,6,31,'Europe/Copenhagen');
