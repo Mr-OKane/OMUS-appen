@@ -22,7 +22,9 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'address' => "required|integer|digits_between:1,20",
+            'address' => "required|string|max:255",
+            'zipCode' => "required|string|max:10",
+            'city' => "required|string|max:255",
             'status' => "required|string|in:pending, accepted",
             'user' => "required|integer|digits_between:1,20",
             'products' => "required|array",
@@ -33,8 +35,12 @@ class StoreOrderRequest extends FormRequest
     public function messages()
     {
         return [
-            'address.required' => 'ordren skal have en addresse.',
-            'address.digits_between' => "ordrens addresse skal være mellem 1 og 20 cifre.",
+            'address.required' => "Brugeren skal have en addresse.",
+            'address.max' => "addressen har et max på 255 tegn.",
+            'zipCode.required' => "addressen skal have en postnummeret.",
+            'zipCode.max' => "postnummeret har et max på 11 tegn.",
+            'city.required' => "byen skal have en City.",
+            'city.max' => "byen har et max på 255 tegn.",
             'status.required' => "ordren skal have en status.",
             'status.in' => "Statusen skal være enten pending eller accepted.",
             'user.required' => "ordren skal have en bruger.",
