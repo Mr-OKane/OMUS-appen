@@ -23,7 +23,7 @@ class StoreAddressRequest extends FormRequest
     {
         return [
             'address' => 'required|string|max:255',
-            'zipCode' => 'required|integer|digits_between:1,20',
+            'zipCode' => 'required|string|max:10',
         ];
     }
 
@@ -33,7 +33,7 @@ class StoreAddressRequest extends FormRequest
             'address.required' => "addresse fæltet skal være udfyldt.",
             'address.max' => "addressen kan ikke være længere end 255 tegn.",
             'zipCode.required' => 'addressen skal have et postnummer.',
-            'zipCode.digits_between' => 'postnummers id skal mellem 1 og 20 cifre'
+            'zipCode.max' => "postnummeret kan max være 10 cifre."
         ];
     }
 }
