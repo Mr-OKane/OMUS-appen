@@ -23,7 +23,7 @@ class CityController extends Controller
         {
             return response()->json(['message' => "1000+ pagnation per page"],400);
         }
-        $city = City::with('zipCodes.addresses')->paginate($pagnationPerPage);
+        $city = City::with('zipCodes')->paginate($pagnationPerPage);
 
         return response()->json(['object' => $city]);
     }
@@ -38,7 +38,7 @@ class CityController extends Controller
             return response()->json(['message' => "1000+ cities per page is to much"],400);
         }
 
-        $cities = City::onlyTrashed()->with('zipCodes.addresses');
+        $cities = City::onlyTrashed()->with('zipCodes');
 
         return response()->json(['object' => $cities]);
     }
