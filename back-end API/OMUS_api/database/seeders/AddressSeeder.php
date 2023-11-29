@@ -20,10 +20,18 @@ class AddressSeeder extends Seeder
         $records = $csv->getRecords();
 
         foreach ($records as $offset => $record){
-            Address::firstOrCreate([
-                'zip_code_id' => ZipCode::where('zip_code','=',$record['postnr'])->first()->id,
-                'address' => $record['vejnavn'].' '.$record['husnr'],
-            ]);
+            if (!empty($record['supplerendebynavn'])) {
+                Address::firstOrCreate([
+                    'zip_code_id' => ZipCode::where('zip_code', '=', $record['postnr'])->first()->id,
+                    'address' => $record['vejnavn'] . ' ' . $record['husnr'] . ', ' . $record['supplerendebynavn'],
+                ]);
+            }else
+            {
+                Address::firstOrCreate([
+                    'zip_code_id' => ZipCode::where('zip_code', '=', $record['postnr'])->first()->id,
+                    'address' => $record['vejnavn'] . ' ' . $record['husnr'],
+                ]);
+            }
         }
     }
 }
