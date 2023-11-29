@@ -21,7 +21,7 @@ class InstrumentController extends Controller
         {
             return response()->json(['message' => "1000+ instruments per page is to much"],400);
         }
-        $instruments = Instrument::with('users')->paginate($paginationPerPage);
+        $instruments = Instrument::paginate($paginationPerPage);
 
         return response()->json(['object' => $instruments]);
     }
