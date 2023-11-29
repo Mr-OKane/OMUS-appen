@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Http\Requests\StoreAddressRequest;
 use App\Http\Requests\UpdateAddressRequest;
+use App\Models\City;
 use App\Models\User;
+use App\Models\ZipCode;
 use Illuminate\Http\Request;
 
 class AddressController extends Controller
@@ -52,7 +54,8 @@ class AddressController extends Controller
 
         $request->validated();
 
-        $addressExists = Address::withTrashed()->firstWhere('address','=', $request['address']);
+        $zipcode = ZipCode::withTrashed()->firstWhere('zip_code','=', $request['zipCode']);
+        $addressExists = Address::withTrashed()->Where('address','=', $request['address'])->where('zip_code_id','=',$zipcode['id'])->first();
 
         if (!empty($addressExists))
         {
@@ -63,13 +66,16 @@ class AddressController extends Controller
             }
             return response()->json(['message' => "The address already exists"],400);
         }
-        else
+
+        if (empty($zipcode))
         {
-            $address = new Address();
-            $address['address'] = $request["address"];
-            $address->zipCode()->associate($request['zipCode']);
-            $address->save();
+            return response()->json(['message' => "The zip code entered does not exist"], 404);
         }
+
+        $address = new Address();
+        $address['address'] = $request["address"];
+        $address->zipCode()->associate($zipcode['id']);
+        $address->save();
 
         $object = Address::withTrashed()->where('id', '=', $address['id'])->first();
         $object->zipCode;
@@ -101,9 +107,15 @@ class AddressController extends Controller
         $request->validated();
 
         $object = Address::withTrashed()->where('id', '=', $address)->first();
+        $zipCode = ZipCode::withTrashed()->firstWhere('zip_code', '=', $request['zipCode']);
         $this->authorize('update',[$object, User::class]);
 
         $addressExists = Address::withTrashed()->firstWhere('address','=', $request['address']);
+
+        if (empty($zipCode))
+        {
+            return response()->json(['message' => "The zip Code does not exist"],404);
+        }
 
         if (!empty($addressExists) && $object['id'] != $addressExists['id'])
         {
