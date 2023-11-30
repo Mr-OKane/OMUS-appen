@@ -22,7 +22,9 @@ class PracticeDateController extends Controller
         {
             return response()->json(['message' => "1000+ pagination per page is to much"],400);
         }
-        $practiceDates = PracticeDate::pagination($pagnationPerPage);
+        $practiceDates = PracticeDate::paginate($pagnationPerPage);
+
+        return response()->json(['object' => $practiceDates]);
     }
 
     /**
@@ -63,7 +65,6 @@ class PracticeDateController extends Controller
 
         $object = PracticeDate::withTrashed()->firstWhere('id','=', $practiceDate);
         $object->users;
-        $object->CakeArrangements;
         return response()->json(['object' => $object]);
     }
 
