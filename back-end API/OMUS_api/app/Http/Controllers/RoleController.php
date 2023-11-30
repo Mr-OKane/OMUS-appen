@@ -26,7 +26,7 @@ class RoleController extends Controller
             return response()->json(['message' => "1000+ pagination per page is to much"],400);
         }
 
-        $roles = Role::with('permissions')->paginate($paginationPerPage);
+        $roles = Role::withoutTrashed()->paginate($paginationPerPage);
 
         return response()->json(['object' => $roles]);
     }
@@ -41,7 +41,7 @@ class RoleController extends Controller
             return response()->json(['message' => "1000+ roles per page at a time is to much"],400);
         }
 
-        $roles = Role::onlyTrashed()->with('permissions')->paginate($paginationPerPage);
+        $roles = Role::onlyTrashed()->paginate($paginationPerPage);
         return response()->json(['message' => "Deleted roles", 'object' => $roles]);
     }
 
