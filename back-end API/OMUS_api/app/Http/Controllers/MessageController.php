@@ -18,6 +18,7 @@ class MessageController extends Controller
     {
         //
     }
+
     public function chatMessages(Request $request, string $chat)
     {
         $this->authorize('viewAny',Message::class);
@@ -49,7 +50,7 @@ class MessageController extends Controller
         $message->user()->associate($user['id']);
         $message->save();
 
-        $object = Message::withTrashed()->firstWhere('id','=', $message['id']);
+        $object = Message::where('id','=', $message['id'])->first;
         $object->chat;
 
         return response()->json(['message' => "created message successfully",'object' => $object],201);
@@ -62,7 +63,7 @@ class MessageController extends Controller
     {
         $user = \auth('sanctum')->user();
         $this->authorize('view', [Message::class,$user]);
-        $object = Message::withTrashed()->firstWhere('id','=', $message);
+        $object = Message::where('id','=', $message)->first();
         $object->chat;
         $object->user;
 
@@ -74,7 +75,7 @@ class MessageController extends Controller
      */
     public function update(UpdateMessageRequest $request, string $message)
     {
-        $object = Message::withTrashed()->firstWhere('id','=', $message);
+        $object = Message::where('id','=', $message)->first();
 
         $this->authorize('update', [$object, User::class]);
 
@@ -97,7 +98,7 @@ class MessageController extends Controller
         $user = \auth('sanctum')->user();
         $this->authorize('delete', [Message::class,$user]);
 
-        $object = Message::withTrashed()->firstWhere('id','=', $message);
+        $object = Message::where('id','=', $message)->first();
         $object->delete();
         return response()->json(['message' => "deleted the message sucessfully."]);
     }
