@@ -16,12 +16,12 @@ class ZipCodeController extends Controller
     {
         $this->authorize('viewAny',ZipCode::class);
 
-        $paginationPerPage = $request->input('p') ?? 15;
+        $paginationPerPage = $request->input('p') ?? 50;
         if ($paginationPerPage >= 1000)
         {
             return response()->json(['message' => "1000+ per page is to much"],400);
         }
-        $zipCodes = ZipCode::with('addresses')->with('city')->paginate($paginationPerPage);
+        $zipCodes = ZipCode::with('city')->paginate($paginationPerPage);
 
         return response()->json(['object' => $zipCodes]);
     }
